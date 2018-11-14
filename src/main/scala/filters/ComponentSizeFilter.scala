@@ -4,7 +4,7 @@ import com.sksamuel.scrimage.{Image, Pixel, PixelTools}
 
 import scala.collection.mutable
 
-class ComponentSizeFilter(minSize: Int, structuralElement: StructuralElement = StructuralElements.structSquare) extends Filter{
+class ComponentSizeFilter(val minSize: Int, val structuralElement: StructuralElement = StructuralElements.structSquare) extends Filter{
   private val recStructEle = structuralElement.element.filterNot(p => p._1 == 0 && p._2 == 0)
 
   override def apply(img: Image): Image = {

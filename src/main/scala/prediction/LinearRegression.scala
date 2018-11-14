@@ -23,6 +23,13 @@ object LinearRegression {
     pts.toVector
   }
 
+  def getLineEndpoints(data: Vector[(Int, Int)], mb: (Double, Double)): ((Int, Int), (Int, Int)) = {
+    val (m, b) = mb
+    val minX = data.map(_._1).min
+    val maxX = data.map(_._1).max
+    ((minX, math.round(minX*m + b).toInt), (maxX, math.round(maxX*m + b).toInt))
+  }
+
   def produceConstrainedLinePoints(data: Vector[(Int, Int)], mbp: (Double, Double, Double)): Vector[(Int, Int)] =
     produceConstrainedLinePoints(data, (mbp._1, mbp._2))
 }
