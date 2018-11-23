@@ -14,15 +14,15 @@ object TubeTracker extends App {
   /*
 
   TODO:
-  Automatic contrast
-  Interpolation of tube from two points
-  prediction of extension
+  Check catastrophe
+  Output lengths
+  Set up actor system to preprocess images
    */
 
   val file = new File(s"mt1.jpg")
   val outFile = new File(s"test1.jpg")
   val outFile2 = new File(s"skel_test1.jpg")
-  val img: Image = Image.fromFile(file).subimage(100, 100, 200, 200)
+  val img: Image = Image.fromFile(file)//.subimage(100, 100, 200, 200)
     .applyKernel(kernBlur)
     .applyKernel(kernSharpen)
     .filter(filter.GrayscaleFilter)
@@ -58,7 +58,7 @@ object TubeTracker extends App {
   mapped.output(outFile2)
   println("Wrote image")
 
-  val tracker = new LinearTracker(pred, 75, StructuralElements.structCross, size, open, close)
+  val tracker = new LinearTracker(pred, 65, StructuralElements.structCross, size, open, close)
 
   for(i <- 2 to 10) {
 
@@ -68,13 +68,14 @@ object TubeTracker extends App {
 
     val file = new File(s"mt$i.jpg")
     val outFile = new File(s"test$i.jpg")
-    val img: Image = Image.fromFile(file).subimage(100, 100, 200, 200)
+    val img: Image = Image.fromFile(file)//.subimage(100, 100, 200, 200)
       .applyKernel(kernBlur)
       .applyKernel(kernSharpen)
       .filter(filter.GrayscaleFilter)
     //.filter(filter.ContrastFilter(0.5))
+    val timg = img.filter(filter.ThresholdFilter(tracker.thresholdValue)).applyFilter(open).applyFilter(close)
     println("Read image")
-    tubes = tubes map (tube => tracker.findNewTube(tube, img)) filter (_.points.nonEmpty)
+    tubes = tubes map (tube => tracker.findNewTubeFromPoints(tube, timg)) filter (_.points.nonEmpty)
     println("Extended tubes")
     tubes foreach { tube =>
       val mbp = LinearRegression.doRegression(tube.points)
