@@ -44,7 +44,7 @@ object TubeTracker extends App {
   var tubes = size.listConnectedComponents(mapped) map { pts =>
     val mbp = LinearRegression.doRegression(pts)
     println(s"Modelled tube with significance ${mbp._3}")
-    println(s"Points: $pts")
+    //println(s"Points: $pts")
     val regpts = LinearRegression.produceConstrainedLinePoints(pts, mbp)
     regpts foreach {
       case (x, y) => if (Filter.checkPxRange(mapped, (x, y))) {
@@ -79,7 +79,7 @@ object TubeTracker extends App {
     println("Extended tubes")
     tubes foreach { tube =>
       val mbp = LinearRegression.doRegression(tube.points)
-      println(s"Modelled tube with significance ${mbp._3}")
+      println(s"Modelled tube with significance ${mbp._3} from ${tube.p1} to ${tube.p2} and length ${math.sqrt(math.pow(tube.p1._2 - tube.p2._2, 2) + math.pow(tube.p1._1 - tube.p2._1, 2))}")
       val regpts = LinearRegression.produceConstrainedLinePoints(tube.points, mbp)
       regpts foreach {
         case (x, y) => if (Filter.checkPxRange(mapped, (x, y))) {
@@ -91,28 +91,5 @@ object TubeTracker extends App {
     println("Wrote image")
 
   }
-
-  /*
-
-  val p1 = (30, 150)
-  val p2 = (45, 234)
-  val m = (p2._2 - p1._2).toDouble/(p2._1 - p1._1)
-  val b = p1._2 - (m * p1._1)
-  for(i <- 0 to 50) {
-    val x = p2._1 + i
-    val y = math.round(m*x+b).toInt
-    println(pred.getProbabilityMetric((x,y), p1, p2))
-  }
-  println("-----------------------------")
-  val m2 = -1/m
-  val b2 = p2._2 - (m2 * p2._1)
-  for(i <- 0 to 50) {
-    val x = p2._1 + i
-    val y = math.round(m2*x+b2).toInt
-    println(pred.getProbabilityMetric((x,y), p1, p2))
-  }
-  println("-----------------------------")
-  println(m, b, m2, b2)
-  */
 }
 
