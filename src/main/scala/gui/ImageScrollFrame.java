@@ -5,6 +5,7 @@ import java.awt.*;
 
 public class ImageScrollFrame extends JInternalFrame {
     private RegionSelectorListener listener;
+
     public ImageScrollFrame(String filename) {
 
         setIconifiable(true);
@@ -26,5 +27,6 @@ public class ImageScrollFrame extends JInternalFrame {
     public static void main(String[] args)
     {
         new ImageScrollFrame("C:\\Users\\john\\Desktop\\DSCF8487.jpg").setVisible(true);
+
     }
 }

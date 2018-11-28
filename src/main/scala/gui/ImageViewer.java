@@ -129,12 +129,14 @@ public class ImageViewer extends javax.swing.JFrame {
             if (file == null) return;
             ImageScrollFrame ifr = new ImageScrollFrame(file.getAbsolutePath());
             desktop.add(ifr, javax.swing.JLayeredPane.DEFAULT_LAYER);
-
+            setContentPane(ifr);
             ifr.setVisible( true );
             ifr.setSize(530, 550);
             ifr.setLocation(100, 100);
 
             desktop.setSelectedFrame(ifr);
+
+
 //            ImageIcon ifr = new ImageIcon(file.getAbsolutePath());
 //            JLabel iLabel = new JLabel(ifr);
 //            iLabel.setBounds(100, 100, 800, 800);

@@ -26,10 +26,15 @@ public class RegionSelectorListener extends JPanel implements MouseListener {
         return dr;
     }
 
-//    public void drawCircle(int x, int y) {
-//        Graphics g = this.getGraphics();
-//        g.drawOval(x,y,5,5);
-//    }
+    /**should draw all endpoints when repaint() is called, but does not**/
+    public void paintComponent(Graphics g) {
+        for (int i=0; i<pointsList.size(); i++) {
+            System.out.println(i); //not getting here
+            g.setColor(Color.RED);
+            g.fillOval(pointsList.get(i)._1.x, pointsList.get(i)._1.y,2,2);
+            g.fillOval(pointsList.get(i)._2.x, pointsList.get(i)._2.y,2,2);
+        }
+    }
 
     public void mouseClicked(MouseEvent event) {
         if (origin == null) { //If the first corner is not set...
@@ -49,7 +54,7 @@ public class RegionSelectorListener extends JPanel implements MouseListener {
             System.out.println("P2 Y is: "+ p.y);
 
             pointsList.add(new Tuple2<>(origin, p));
-
+            repaint(); //should theoretically display the two dots by calling the paintComponents function, but does not
             pointsList.forEach(e -> System.out.println(e.toString()));
             
 
