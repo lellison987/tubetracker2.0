@@ -9,7 +9,7 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.util.LinkedList;
 
-public class RegionSelectorListener extends MouseAdapter {
+public class RegionSelectorListener extends JPanel implements MouseListener {
     final JScrollPane label;
     private Point origin = null;
     private LinkedList<Tuple2<Point, Point>> pointsList = null;
@@ -26,11 +26,16 @@ public class RegionSelectorListener extends MouseAdapter {
         return dr;
     }
 
+//    public void drawCircle(int x, int y) {
+//        Graphics g = this.getGraphics();
+//        g.drawOval(x,y,5,5);
+//    }
 
     public void mouseClicked(MouseEvent event) {
         if (origin == null) { //If the first corner is not set...
 
             origin = getAbsolutePoint(event); //set it.
+//            drawCircle(origin.x,origin.y);
 
         } else { //if the first corner is already set...
 
@@ -46,6 +51,7 @@ public class RegionSelectorListener extends MouseAdapter {
             pointsList.add(new Tuple2<>(origin, p));
 
             pointsList.forEach(e -> System.out.println(e.toString()));
+            
 
             // set origin
             origin = null;

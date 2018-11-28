@@ -13,6 +13,10 @@ package gui;
  * Microsystems, Inc. All Rights Reserved.
  */
 
+import javax.swing.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+
 /** This class is an entry point of the simple image viewer.
  * It creates and shows the main application frame.
  */
@@ -39,6 +43,19 @@ public class ImageViewer extends javax.swing.JFrame {
         openMenuItem = new javax.swing.JMenuItem();
         jSeparator1 = new javax.swing.JSeparator();
         exitMenuItem = new javax.swing.JMenuItem();
+        JButton b1 = new javax.swing.JButton("Hello");
+        b1.setSize(100,25);
+        b1.setVisible(true);
+        desktop.add(b1);
+        desktop.setVisible(true);
+
+        b1.addActionListener(new ActionListener()
+        {
+            public void actionPerformed(ActionEvent e)
+            {
+                System.out.println("Hello");
+            }
+        });
 
         setTitle("Image Viewer");
         addWindowListener(new java.awt.event.WindowAdapter() {
@@ -114,10 +131,15 @@ public class ImageViewer extends javax.swing.JFrame {
             desktop.add(ifr, javax.swing.JLayeredPane.DEFAULT_LAYER);
 
             ifr.setVisible( true );
-            ifr.setSize(200, 200);
-            ifr.setLocation(0, 0);
+            ifr.setSize(530, 550);
+            ifr.setLocation(100, 100);
 
             desktop.setSelectedFrame(ifr);
+//            ImageIcon ifr = new ImageIcon(file.getAbsolutePath());
+//            JLabel iLabel = new JLabel(ifr);
+//            iLabel.setBounds(100, 100, 800, 800);
+//            iLabel.setVisible(true);
+//            desktop.add(iLabel);
         }
     }//GEN-LAST:event_openMenuItemActionPerformed
 
