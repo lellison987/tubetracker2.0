@@ -19,7 +19,7 @@ object LinearRegression {
     val maxX = data.map(_._1).max
     val minY = data.map(_._2).min
     val maxY = data.map(_._2).max
-    val pts = for{x <- minX to maxX /*if x*m + b >= minY && x*m + b <= maxY*/} yield (x, math.round(x*m + b).toInt)
+    val pts = for{x <- minX to maxX if x*m + b >= minY && x*m + b <= maxY} yield (x, math.round(x*m + b).toInt)
     pts.toVector
   }
 
