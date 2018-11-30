@@ -1,5 +1,4 @@
-import gui.ImageScrollFrame;
-import gui.ImageViewer;
+package gui;
 
 import java.awt.Color;
 import java.awt.Dimension;
@@ -21,7 +20,7 @@ import javax.swing.*;
 //import static com.sun.java.accessibility.util.AWTEventMonitor.addWindowListener;
 
 //ignore the missing package. It works.
-public class Main extends JFrame{
+public class TubeTrackerGUI extends JFrame{
     private javax.swing.JDesktopPane desktop;
     private javax.swing.JMenuItem exitMenuItem;
     private javax.swing.JMenu fileMenu;
@@ -30,18 +29,18 @@ public class Main extends JFrame{
     private javax.swing.JMenuItem openMenuItem;
     private String imagePath;
     private JFrame frame;
-    private TestPane imagePane;
+    private ImagePane imagePane;
 
     public static void main(String[] args) {
-        new Main();
+        new TubeTrackerGUI();
     }
 
-    public Main() {
+    public TubeTrackerGUI() {
         SwingUtilities.invokeLater(new Runnable() {
             @Override
             public void run() {
                 frame = new JFrame();
-                imagePane = new TestPane();
+                imagePane = new ImagePane();
                 frame.add(imagePane);
                 initComponents();
                 frame.setJMenuBar(mainMenuBar);
@@ -117,8 +116,8 @@ public class Main extends JFrame{
                 fileMenu.getAccessibleContext().setAccessibleDescription("File menu.");
 
                 setJMenuBar(mainMenuBar);
-                mainMenuBar.getAccessibleContext().setAccessibleName("Main Menu Bar");
-                mainMenuBar.getAccessibleContext().setAccessibleDescription("Main menu bar.");
+                mainMenuBar.getAccessibleContext().setAccessibleName("TubeTrackerGUI Menu Bar");
+                mainMenuBar.getAccessibleContext().setAccessibleDescription("TubeTrackerGUI menu bar.");
 
             }
         });
@@ -144,7 +143,7 @@ public class Main extends JFrame{
             imagePath = file.getAbsolutePath();
             frame.remove(imagePane);
             frame.setVisible(false);
-            imagePane = new TestPane();
+            imagePane = new ImagePane();
             frame.add(imagePane);
             frame.setVisible(true);
 
@@ -159,18 +158,18 @@ public class Main extends JFrame{
         }
     }
 
-    public class TestPane extends JPanel {
+    public class ImagePane extends JPanel {
 
         private List<Point> points; //change to duples of points
         private BufferedImage image;
 
-        public TestPane() {
+        public ImagePane() {
             points = new ArrayList<>(25);
             try {
                 if (imagePath!=null) {
                     image = ImageIO.read(new File(imagePath));
                 } else {
-                    image = ImageIO.read(new File("C:\\Users\\Lauren\\IdeaProjects\\tubetracker2.0\\mt1.jpg"));
+                    image = ImageIO.read(new File("mt1.jpg"));
                 }
             } catch (IOException ex) {
                 ex.printStackTrace();

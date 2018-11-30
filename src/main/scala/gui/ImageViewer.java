@@ -103,8 +103,8 @@ public class ImageViewer extends javax.swing.JFrame {
         fileMenu.getAccessibleContext().setAccessibleDescription("File menu.");
 
         setJMenuBar(mainMenuBar);
-        mainMenuBar.getAccessibleContext().setAccessibleName("Main Menu Bar");
-        mainMenuBar.getAccessibleContext().setAccessibleDescription("Main menu bar.");
+        mainMenuBar.getAccessibleContext().setAccessibleName("TubeTrackerGUI Menu Bar");
+        mainMenuBar.getAccessibleContext().setAccessibleDescription("TubeTrackerGUI menu bar.");
 
     }//GEN-END:initComponents
 
@@ -154,7 +154,7 @@ public class ImageViewer extends javax.swing.JFrame {
 
     /** Define custom file filter for acceptable image files.
      */
-    private static class ImageFileFilter extends javax.swing.filechooser.FileFilter {
+    public static class ImageFileFilter extends javax.swing.filechooser.FileFilter {
 
         public boolean accept(java.io.File file) {
             if (file == null)
