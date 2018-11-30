@@ -2,7 +2,7 @@ package prediction
 
 import com.sksamuel.scrimage.Image
 import filters.{ComponentSizeFilter, Filter}
-import objects.{ImageTubeList, Tubule}
+import objects.{ImageTrackerOptions, ImageTubeList, Tubule}
 
 //images should be preprocessed
 //first image should be the first one for which tubes should be predicted -- e.g allimages.tail
@@ -26,5 +26,14 @@ object ImageTracker {
       Tubule(pts, regpts.head, regpts.last)
     }
     tubes
+  }
+
+  def getLinearTracker(opt: ImageTrackerOptions): LinearTracker = {
+    new LinearTracker(
+      new LinearPredictor(opt.alpha, opt.beta, opt.pValueLimit),
+      opt.thresholdValue,
+      opt.structuralElement,
+      new ComponentSizeFilter(opt.minSize)
+    )
   }
 }
