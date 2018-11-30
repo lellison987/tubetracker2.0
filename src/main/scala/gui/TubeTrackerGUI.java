@@ -1,12 +1,12 @@
 package gui;
 
+import scala.collection.immutable.Vector;
+
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Point;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
@@ -27,6 +27,7 @@ public class TubeTrackerGUI extends JFrame{
     private javax.swing.JSeparator jSeparator1;
     private javax.swing.JMenuBar mainMenuBar;
     private javax.swing.JMenuItem openMenuItem;
+    private javax.swing.JMenuItem runMenuItem;
     private String imagePath;
     private JFrame frame;
     private ImagePane imagePane;
@@ -44,6 +45,7 @@ public class TubeTrackerGUI extends JFrame{
                 frame.add(imagePane);
                 initComponents();
                 frame.setJMenuBar(mainMenuBar);
+                frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
                 frame.pack();
                 frame.setLocationRelativeTo(null);
                 frame.setVisible(true);
@@ -54,21 +56,22 @@ public class TubeTrackerGUI extends JFrame{
                 mainMenuBar = new javax.swing.JMenuBar();
                 fileMenu = new javax.swing.JMenu();
                 openMenuItem = new javax.swing.JMenuItem();
+                runMenuItem = new javax.swing.JMenuItem();
                 jSeparator1 = new javax.swing.JSeparator();
                 exitMenuItem = new javax.swing.JMenuItem();
-                JButton b1 = new javax.swing.JButton("Hello");
-                b1.setSize(100,25);
-                b1.setVisible(true);
-                desktop.add(b1);
+//                JButton b1 = new javax.swing.JButton("Hello");
+//                b1.setSize(100,25);
+//                b1.setVisible(true);
+//                desktop.add(b1);
                 desktop.setVisible(true);
 
-                b1.addActionListener(new ActionListener()
-                {
-                    public void actionPerformed(ActionEvent e)
-                    {
-                        System.out.println("Hello");
-                    }
-                });
+//                b1.addActionListener(new ActionListener()
+//                {
+//                    public void actionPerformed(ActionEvent e)
+//                    {
+//                        System.out.println("Hello");
+//                    }
+//                });
 
                 setTitle("Image Viewer");
                 addWindowListener(new java.awt.event.WindowAdapter() {
@@ -96,6 +99,19 @@ public class TubeTrackerGUI extends JFrame{
                 fileMenu.add(openMenuItem);
                 openMenuItem.getAccessibleContext().setAccessibleName("Open Menu Item");
                 openMenuItem.getAccessibleContext().setAccessibleDescription("Open menu item.");
+
+                runMenuItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_R, java.awt.event.InputEvent.CTRL_MASK));
+                runMenuItem.setMnemonic('r');
+                runMenuItem.setText("Run");
+                runMenuItem.addActionListener(new java.awt.event.ActionListener() {
+                    public void actionPerformed(java.awt.event.ActionEvent evt) {
+                        runMenuItemActionPerformed(evt);
+                    }
+                });
+
+                fileMenu.add(runMenuItem);
+                runMenuItem.getAccessibleContext().setAccessibleName("Run Menu Item");
+                runMenuItem.getAccessibleContext().setAccessibleDescription("Run menu item.");
 
                 fileMenu.add(jSeparator1);
 
@@ -158,20 +174,30 @@ public class TubeTrackerGUI extends JFrame{
         }
     }
 
+    private void runMenuItemActionPerformed(java.awt.event.ActionEvent evt) {
+        System.out.println("Run");
+    }
+
     public class ImagePane extends JPanel {
 
         private List<Point> points; //change to duples of points
-        private BufferedImage image;
+        private BufferedImage displayImage;
+        private RegionSelectorListener listener;
+        private Vector<BufferedImage> images;
 
         public ImagePane() {
             points = new ArrayList<>(25);
+            listener = new RegionSelectorListener(this);
             try {
                 if (imagePath!=null) {
-                    image = ImageIO.read(new File(imagePath));
-                } else {
-                    image = ImageIO.read(new File("mt1.jpg"));
+                    images = TiffStackReader.readStack(new File(imagePath));
+                    displayImage = images.head();
                 }
-            } catch (IOException ex) {
+//                else {
+//                    displayImage = ImageIO.read(new File("mt1.jpg"));
+//                }
+            }
+            catch (Exception ex) {
                 ex.printStackTrace();
             }
 
@@ -179,6 +205,7 @@ public class TubeTrackerGUI extends JFrame{
                 @Override
                 public void mouseClicked(MouseEvent e) {
                     //use function from regionSelectorListener with point duples
+                    listener.mouseClicked(e);
                     points.add(e.getPoint());
                     repaint();
                 }
@@ -187,20 +214,20 @@ public class TubeTrackerGUI extends JFrame{
 
         @Override
         public Dimension getPreferredSize() {
-            return image == null ? new Dimension(200, 200) : new Dimension(image.getWidth(), image.getHeight());
+            return displayImage == null ? new Dimension(200, 200) : new Dimension(displayImage.getWidth(), displayImage.getHeight());
         }
 
         @Override
         protected void paintComponent(Graphics g) {
             super.paintComponent(g);
             Graphics2D g2d = (Graphics2D) g.create();
-            if (image != null) {
-                g2d.drawImage(image, 0, 0, this);
+            if (displayImage != null) {
+                g2d.drawImage(displayImage, 0, 0, this);
             }
             g2d.setColor(Color.RED);
             //change to use point duples not points
             for (Point p : points) {
-                g2d.fillOval(p.x - 4, p.y - 4, 8, 8);
+                g2d.fillOval(p.x - 3, p.y - 3, 6, 6);
             }
             g2d.dispose();
         }

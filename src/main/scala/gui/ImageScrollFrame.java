@@ -1,3 +1,7 @@
+/*
+DEPRECIATED
+ */
+
 package gui;
 
 import javax.swing.*;
@@ -19,7 +23,8 @@ public class ImageScrollFrame extends JInternalFrame {
         JScrollPane scrollPane = new JScrollPane(imageLabel);
         scrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
         scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
-        listener = RegionSelectorListener.install(scrollPane);
+        // I don't think we need this anymore
+        //listener = RegionSelectorListener.install(scrollPane);
         add(scrollPane, BorderLayout.CENTER);
         pack();
     }

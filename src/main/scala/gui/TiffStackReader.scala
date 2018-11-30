@@ -7,7 +7,7 @@ import javax.imageio.ImageIO
 
 object TiffStackReader {
   def readStack(file: File): Vector[BufferedImage] = {
-    /* taken from */
+    /* taken from twelvemonkeys imageio library github page*/
     // Create input stream
     val input = ImageIO.createImageInputStream(file)
 
@@ -38,15 +38,5 @@ object TiffStackReader {
       // Close stream in finally block to avoid resource leaks
       input.close()
     }
-  }
-
-  def main(args: Array[String]): Unit = {
-    val imgs =
-      readStack(
-        new File(
-          "C:\\Users\\john\\Documents\\School\\Computer Science\\Geometric Computing for Biomedicine\\Project\\microtubule_videos\\MT dynamics example image stack.tif"
-        )
-      )
-    println(s"Read ${imgs.length} images")
   }
 }
