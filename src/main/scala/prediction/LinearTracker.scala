@@ -6,7 +6,6 @@ import com.sksamuel.scrimage.{Image, filter}
 import filters._
 import objects.Tubule
 import filters.Filter._
-import filters.OpenCloseFilter.{dilateInPlace, erodeInPlace, nest}
 
 import scala.collection.mutable
 
@@ -23,9 +22,7 @@ class LinearTracker(
                      val predictor: LinearPredictor,
                      val thresholdValue: Int,
                      val structuralElement: StructuralElement,
-                     val sizeFilter: ComponentSizeFilter,
-                     val open: OpenFilter,
-                     val close: CloseFilter
+                     val sizeFilter: ComponentSizeFilter
                    ) {
   def findCenterPoint(tubepts: Vector[(Int, Int)], range: Int = 3): (Int, Int) = {
     //take a slice from the middle and find the centroid of that
@@ -47,7 +44,7 @@ class LinearTracker(
     //threshold
     //apply morphological operations? How to avoid applying over entire image? necessary?
     //TODO: experiment with morphological operations (open, then close) -- maybe on subimage
-    val timg = newimg.filter(filter.ThresholdFilter(thresholdValue)).applyFilter(open).applyFilter(close)
+    val timg = newimg
     val pts = tube.points
     //try a center point first
     //timg.output(new File("here.jpg"))
