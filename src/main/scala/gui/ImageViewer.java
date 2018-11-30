@@ -1,3 +1,7 @@
+/*
+DEPRECIATED
+ */
+
 package gui;
 
 /*
@@ -12,6 +16,10 @@ package gui;
  * Code is Sun Microsystems, Inc. Portions Copyright 1997-2000 Sun
  * Microsystems, Inc. All Rights Reserved.
  */
+
+import javax.swing.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 
 /** This class is an entry point of the simple image viewer.
  * It creates and shows the main application frame.
@@ -39,6 +47,19 @@ public class ImageViewer extends javax.swing.JFrame {
         openMenuItem = new javax.swing.JMenuItem();
         jSeparator1 = new javax.swing.JSeparator();
         exitMenuItem = new javax.swing.JMenuItem();
+        JButton b1 = new javax.swing.JButton("Hello");
+        b1.setSize(100,25);
+        b1.setVisible(true);
+        desktop.add(b1);
+        desktop.setVisible(true);
+
+        b1.addActionListener(new ActionListener()
+        {
+            public void actionPerformed(ActionEvent e)
+            {
+                System.out.println("Hello");
+            }
+        });
 
         setTitle("Image Viewer");
         addWindowListener(new java.awt.event.WindowAdapter() {
@@ -86,8 +107,8 @@ public class ImageViewer extends javax.swing.JFrame {
         fileMenu.getAccessibleContext().setAccessibleDescription("File menu.");
 
         setJMenuBar(mainMenuBar);
-        mainMenuBar.getAccessibleContext().setAccessibleName("Main Menu Bar");
-        mainMenuBar.getAccessibleContext().setAccessibleDescription("Main menu bar.");
+        mainMenuBar.getAccessibleContext().setAccessibleName("TubeTrackerGUI Menu Bar");
+        mainMenuBar.getAccessibleContext().setAccessibleDescription("TubeTrackerGUI menu bar.");
 
     }//GEN-END:initComponents
 
@@ -112,12 +133,19 @@ public class ImageViewer extends javax.swing.JFrame {
             if (file == null) return;
             ImageScrollFrame ifr = new ImageScrollFrame(file.getAbsolutePath());
             desktop.add(ifr, javax.swing.JLayeredPane.DEFAULT_LAYER);
-
+            setContentPane(ifr);
             ifr.setVisible( true );
-            ifr.setSize(200, 200);
-            ifr.setLocation(0, 0);
+            ifr.setSize(530, 550);
+            ifr.setLocation(100, 100);
 
             desktop.setSelectedFrame(ifr);
+
+
+//            ImageIcon ifr = new ImageIcon(file.getAbsolutePath());
+//            JLabel iLabel = new JLabel(ifr);
+//            iLabel.setBounds(100, 100, 800, 800);
+//            iLabel.setVisible(true);
+//            desktop.add(iLabel);
         }
     }//GEN-LAST:event_openMenuItemActionPerformed
 
@@ -130,7 +158,7 @@ public class ImageViewer extends javax.swing.JFrame {
 
     /** Define custom file filter for acceptable image files.
      */
-    private static class ImageFileFilter extends javax.swing.filechooser.FileFilter {
+    public static class ImageFileFilter extends javax.swing.filechooser.FileFilter {
 
         public boolean accept(java.io.File file) {
             if (file == null)

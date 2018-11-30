@@ -1,0 +1,11 @@
+<component name="libraryTable">
+  <library name="sbt: net.imagej:ij:1.52h:jar">
+    <CLASSES>
+      <root url="jar://$USER_HOME$/.ivy2/cache/net.imagej/ij/jars/ij-1.52h.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES>
+      <root url="jar://$USER_HOME$/.ivy2/cache/net.imagej/ij/srcs/ij-1.52h-sources.jar!/" />
+    </SOURCES>
+  </library>
+</component>

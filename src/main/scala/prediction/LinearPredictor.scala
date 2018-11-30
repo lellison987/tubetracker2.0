@@ -1,6 +1,6 @@
 package prediction
 
-class LinearPredictor(val alpha: Double = 200.0, val beta: Double = 100.0, pValueLimit: Double = 0.05) {
+class LinearPredictor(val alpha: Double = 200.0, val beta: Double = 100.0, val pValueLimit: Double = 0.05) {
   def distanceFromLine(p: (Int, Int), m: Double, b: Double): Double = {
     math.abs(b + m*p._1 - p._2) / math.sqrt(1 + math.pow(m, 2))
   }
