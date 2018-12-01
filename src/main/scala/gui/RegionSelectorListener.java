@@ -4,7 +4,6 @@ import scala.Tuple2;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.util.LinkedList;
@@ -94,6 +93,10 @@ public class RegionSelectorListener extends JPanel implements MouseListener {
     }
 
     public void dropLastFromPointsList() {
-        pointsList.removeLast();
+        if(pointsList.size() > 0) pointsList.removeLast();
     }
+
+    public boolean completedPointPair() { return origin == null; }
+
+    public void reset() { origin = null; }
 }

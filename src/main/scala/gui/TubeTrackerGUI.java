@@ -1,6 +1,8 @@
 package gui;
 
+import com.sksamuel.scrimage.Image;
 import objects.ImageTrackerOptions;
+import prediction.TubeTracker;
 import scala.collection.immutable.Vector;
 
 import java.awt.Color;
@@ -12,10 +14,8 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
 import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import javax.imageio.ImageIO;
 import javax.swing.*;
 
 //import static com.sun.java.accessibility.util.AWTEventMonitor.addWindowListener;
@@ -23,7 +23,7 @@ import javax.swing.*;
 //ignore the missing package. It works.
 public class TubeTrackerGUI extends JFrame{
     private javax.swing.JDesktopPane desktop;
-    private javax.swing.JMenuItem exitMenuItem;
+    private javax.swing.JMenuItem undoMenuItem;
     private javax.swing.JMenu fileMenu;
     private javax.swing.JSeparator jSeparator1;
     private javax.swing.JMenuBar mainMenuBar;
@@ -59,7 +59,7 @@ public class TubeTrackerGUI extends JFrame{
                 openMenuItem = new javax.swing.JMenuItem();
                 runMenuItem = new javax.swing.JMenuItem();
                 jSeparator1 = new javax.swing.JSeparator();
-                exitMenuItem = new javax.swing.JMenuItem();
+                undoMenuItem = new javax.swing.JMenuItem();
                 desktop.setVisible(true);
 
                 setTitle("Image Viewer");
@@ -102,19 +102,20 @@ public class TubeTrackerGUI extends JFrame{
                 runMenuItem.getAccessibleContext().setAccessibleName("Run Menu Item");
                 runMenuItem.getAccessibleContext().setAccessibleDescription("Run menu item.");
 
-                fileMenu.add(jSeparator1);
+                undoMenuItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_Z, java.awt.event.InputEvent.CTRL_MASK));
+                undoMenuItem.setMnemonic('z');
+                undoMenuItem.setText("Undo");
+                undoMenuItem.addActionListener(new java.awt.event.ActionListener() {
+                    public void actionPerformed(java.awt.event.ActionEvent evt) {
+                        undoMenuItemActionPerformed(evt);
+                    }
+                });
 
-//                exitMenuItem.setMnemonic('x');
-//                exitMenuItem.setText("Exit");
-//                exitMenuItem.addActionListener(new java.awt.event.ActionListener() {
-//                    public void actionPerformed(java.awt.event.ActionEvent evt) {
-//                        exitMenuItemActionPerformed(evt);
-//                    }
-//                });
-//
-//                fileMenu.add(exitMenuItem);
-//                exitMenuItem.getAccessibleContext().setAccessibleName("Exit Menu Item");
-//                exitMenuItem.getAccessibleContext().setAccessibleDescription("Exit menu item.");
+                fileMenu.add(undoMenuItem);
+                undoMenuItem.getAccessibleContext().setAccessibleName("Undo Menu Item");
+                undoMenuItem.getAccessibleContext().setAccessibleDescription("Undo menu item.");
+
+                fileMenu.add(jSeparator1);
 
                 mainMenuBar.add(fileMenu);
                 fileMenu.getAccessibleContext().setAccessibleName("File Menu");
@@ -162,9 +163,32 @@ public class TubeTrackerGUI extends JFrame{
     }
 
     private void runMenuItemActionPerformed(java.awt.event.ActionEvent evt) {
-        System.out.println(
-                prediction.TubeTracker.track(imagePane.images, imagePane.listener.getPointsList(), ImageTrackerOptions.defaultOptions())
-        );
+        java.util.List<objects.ImageTubeList> trackedTubes = prediction.TubeTracker.trackFromProcessedImages(imagePane.processedImages, imagePane.listener.getPointsList(), ImageTrackerOptions.getOptions());
+        trackedTubes.forEach(tubelist -> {
+            scala.collection.JavaConverters.asJavaCollection(tubelist.tubeList()).forEach(
+                    tb -> { System.out.println(tb.length()); }
+            );
+        });
+    }
+
+    private void undoMenuItemActionPerformed(java.awt.event.ActionEvent evt) {
+        if(imagePane.listener.completedPointPair()) {
+            //point pair was completed, must remove last two points
+            imagePane.listener.reset();
+            imagePane.listener.dropLastFromPointsList();
+            //remove last point
+            if(imagePane.points.size() > 0) imagePane.points.remove(imagePane.points.size() - 1);
+            if(imagePane.points.size() > 0) imagePane.points.remove(imagePane.points.size() - 1);
+            //redraw
+            imagePane.repaint();
+        } else {
+            //point pair was not completed and origin != null
+            imagePane.listener.reset();
+            //remove last point
+            if(imagePane.points.size() > 0) imagePane.points.remove(imagePane.points.size() - 1);
+            //redraw
+            imagePane.repaint();
+        }
     }
 
     public class ImagePane extends JPanel {
@@ -173,13 +197,18 @@ public class TubeTrackerGUI extends JFrame{
         private BufferedImage displayImage;
         private RegionSelectorListener listener;
         private Vector<BufferedImage> images;
+        private Vector<Image> processedImages;
 
         public ImagePane() {
             points = new ArrayList<>(25);
             listener = new RegionSelectorListener(this);
             try {
                 if (imagePath!=null) {
+                    System.out.println("Reading images...");
                     images = TiffStackReader.readStack(new File(imagePath));
+                    System.out.println("Processing images... Please wait.");
+                    processedImages = TubeTracker.processImages(images);
+                    System.out.println("Done processing images.");
                     displayImage = images.head();
                 }
             }

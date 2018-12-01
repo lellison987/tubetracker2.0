@@ -2,4 +2,4 @@ package objects
 
 import com.sksamuel.scrimage.Image
 
-case class ImageTubeList(img: Image, pxList: Vector[Tubule])
+case class ImageTubeList(img: Image, tubeList: Vector[Tubule])
