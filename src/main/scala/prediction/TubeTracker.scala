@@ -1,20 +1,17 @@
+package prediction
+
 import java.awt.Point
 import java.awt.image.BufferedImage
-import java.io.File
 
 import akka.actor.ActorSystem
 import akka.util.Timeout
-import com.sksamuel.scrimage.{Image, Pixel, filter}
-import filters.Kernel._
-import filters.Kernels._
-import filters._
-import filters.Filter._
+import com.sksamuel.scrimage.Image
 import objects.{ImageTrackerOptions, ImageTubeList, Tubule}
-import prediction.{ImageTracker, LinearPredictor, LinearRegression, LinearTracker}
 import processing.ImageProcessor
 
-import scala.concurrent.{Await, ExecutionContext}
 import scala.concurrent.duration._
+import scala.collection.JavaConverters._
+import scala.concurrent.{Await, ExecutionContext}
 
 object TubeTracker {
 
@@ -24,13 +21,24 @@ object TubeTracker {
 
   implicit def pointToTuple(p: Point): (Int, Int) = (p.x, p.y)
 
-  def track(imgs: Vector[BufferedImage], tubePts: Vector[(Point, Point)], opt: ImageTrackerOptions = ImageTrackerOptions()): Vector[ImageTubeList] = {
+  def track(imgs: Vector[BufferedImage], tubePts: Vector[(Point, Point)], opt: ImageTrackerOptions): Vector[ImageTubeList] = {
     try {
       val proc = ImageProcessor.getDefaultImageProcesser
       val fut = proc.processImages(imgs map { i => Image.fromAwt(i) })
       val images = Await.result(fut, Duration.Inf)
       println("Done processing images.")
       val imgTracker = new ImageTracker(images.tail, tubePts map { t => Tubule(Vector.empty, t._1, t._2) }, ImageTracker.getLinearTracker(opt))
+      imgTracker.trackTubes()
+    } finally system.terminate()
+  }
+
+  def track(imgs: Vector[BufferedImage], tubePts: java.util.List[(Point, Point)], opt: ImageTrackerOptions = ImageTrackerOptions()): Vector[ImageTubeList] = {
+    try {
+      val proc = ImageProcessor.getDefaultImageProcesser
+      val fut = proc.processImages(imgs map { i => Image.fromAwt(i) })
+      val images = Await.result(fut, Duration.Inf)
+      println("Done processing images.")
+      val imgTracker = new ImageTracker(images.tail, tubePts.asScala.toVector map { t => Tubule(Vector.empty, t._1, t._2) }, ImageTracker.getLinearTracker(opt))
       imgTracker.trackTubes()
     } finally system.terminate()
   }

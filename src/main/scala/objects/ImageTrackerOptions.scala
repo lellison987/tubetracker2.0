@@ -10,3 +10,7 @@ case class ImageTrackerOptions(
   structuralElement: StructuralElement = StructuralElements.structCross,
   minSize: Int = 50
 )
+
+object ImageTrackerOptions {
+  val defaultOptions = ImageTrackerOptions()
+}

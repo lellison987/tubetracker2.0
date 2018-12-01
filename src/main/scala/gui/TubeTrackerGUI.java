@@ -1,5 +1,6 @@
 package gui;
 
+import objects.ImageTrackerOptions;
 import scala.collection.immutable.Vector;
 
 import java.awt.Color;
@@ -59,19 +60,7 @@ public class TubeTrackerGUI extends JFrame{
                 runMenuItem = new javax.swing.JMenuItem();
                 jSeparator1 = new javax.swing.JSeparator();
                 exitMenuItem = new javax.swing.JMenuItem();
-//                JButton b1 = new javax.swing.JButton("Hello");
-//                b1.setSize(100,25);
-//                b1.setVisible(true);
-//                desktop.add(b1);
                 desktop.setVisible(true);
-
-//                b1.addActionListener(new ActionListener()
-//                {
-//                    public void actionPerformed(ActionEvent e)
-//                    {
-//                        System.out.println("Hello");
-//                    }
-//                });
 
                 setTitle("Image Viewer");
                 addWindowListener(new java.awt.event.WindowAdapter() {
@@ -145,9 +134,7 @@ public class TubeTrackerGUI extends JFrame{
         System.exit(0);
     }
 
-//    private void exitMenuItemActionPerformed(java.awt.event.WindowEvent evt) {
-//        System.exit(0);
-//    }
+
 
     private void openMenuItemActionPerformed(java.awt.event.ActionEvent evt) {
         javax.swing.JFileChooser chooser = new javax.swing.JFileChooser();
@@ -175,7 +162,9 @@ public class TubeTrackerGUI extends JFrame{
     }
 
     private void runMenuItemActionPerformed(java.awt.event.ActionEvent evt) {
-        System.out.println("Run");
+        System.out.println(
+                prediction.TubeTracker.track(imagePane.images, imagePane.listener.getPointsList(), ImageTrackerOptions.defaultOptions())
+        );
     }
 
     public class ImagePane extends JPanel {
@@ -193,9 +182,6 @@ public class TubeTrackerGUI extends JFrame{
                     images = TiffStackReader.readStack(new File(imagePath));
                     displayImage = images.head();
                 }
-//                else {
-//                    displayImage = ImageIO.read(new File("mt1.jpg"));
-//                }
             }
             catch (Exception ex) {
                 ex.printStackTrace();
@@ -214,7 +200,7 @@ public class TubeTrackerGUI extends JFrame{
 
         @Override
         public Dimension getPreferredSize() {
-            return displayImage == null ? new Dimension(200, 200) : new Dimension(displayImage.getWidth(), displayImage.getHeight());
+            return displayImage == null ? new Dimension(520, 520) : new Dimension(displayImage.getWidth(), displayImage.getHeight());
         }
 
         @Override
