@@ -4,7 +4,9 @@ import com.sksamuel.scrimage.Image;
 import objects.ImageTrackerOptions;
 import objects.ImageTubeList;
 import prediction.TubeTracker;
+import scala.Function1;
 import scala.collection.immutable.Vector;
+import scala.collection.immutable.VectorBuilder;
 
 import java.awt.Color;
 import java.awt.Dimension;
@@ -30,6 +32,10 @@ public class TubeTrackerGUI extends JFrame{
     private javax.swing.JMenuBar mainMenuBar;
     private javax.swing.JMenuItem openMenuItem;
     private javax.swing.JMenuItem runMenuItem;
+    private javax.swing.JMenu exportMenu;
+    private javax.swing.JMenuItem dataFileMenuItem;
+    private javax.swing.JMenuItem labeledImageMenuItem;
+    private javax.swing.JMenuItem processedImagesMenuItem;
     private String imagePath;
     private JFrame frame;
     private ImagePane imagePane;
@@ -59,6 +65,10 @@ public class TubeTrackerGUI extends JFrame{
                 fileMenu = new javax.swing.JMenu();
                 openMenuItem = new javax.swing.JMenuItem();
                 runMenuItem = new javax.swing.JMenuItem();
+                exportMenu = new javax.swing.JMenu();
+                dataFileMenuItem = new javax.swing.JMenuItem();
+                labeledImageMenuItem = new javax.swing.JMenuItem();
+                processedImagesMenuItem = new javax.swing.JMenuItem();
                 jSeparator1 = new javax.swing.JSeparator();
                 undoMenuItem = new javax.swing.JMenuItem();
                 desktop.setVisible(true);
@@ -122,6 +132,42 @@ public class TubeTrackerGUI extends JFrame{
                 fileMenu.getAccessibleContext().setAccessibleName("File Menu");
                 fileMenu.getAccessibleContext().setAccessibleDescription("File menu.");
 
+                exportMenu.setMnemonic('e');
+                exportMenu.setText("Export");
+                dataFileMenuItem.setText("Data File");
+                dataFileMenuItem.addActionListener(new java.awt.event.ActionListener() {
+                    public void actionPerformed(java.awt.event.ActionEvent evt) {
+                        exportDataFileActionPerformed(evt);
+                    }
+                });
+                exportMenu.add(dataFileMenuItem);
+                dataFileMenuItem.getAccessibleContext().setAccessibleName("Export File Menu Item");
+                dataFileMenuItem.getAccessibleContext().setAccessibleDescription("Export file menu item.");
+
+                labeledImageMenuItem.setText("Labeled Image");
+                labeledImageMenuItem.addActionListener(new java.awt.event.ActionListener() {
+                    public void actionPerformed(java.awt.event.ActionEvent evt) {
+                        exportLabeledImagesActionPerformed(evt);
+                    }
+                });
+                exportMenu.add(labeledImageMenuItem);
+                labeledImageMenuItem.getAccessibleContext().setAccessibleName("Export Labeled Image Menu Item");
+                labeledImageMenuItem.getAccessibleContext().setAccessibleDescription("Export labeled image menu item");
+
+                processedImagesMenuItem.setText("Processed Images");
+                processedImagesMenuItem.addActionListener(new java.awt.event.ActionListener() {
+                    public void actionPerformed(java.awt.event.ActionEvent evt) {
+                        exportProcessedImagesActionPerformed(evt);
+                    }
+                });
+                exportMenu.add(processedImagesMenuItem);
+                processedImagesMenuItem.getAccessibleContext().setAccessibleName("Export Processed Images Menu Item");
+                processedImagesMenuItem.getAccessibleContext().setAccessibleDescription("Export processed images menu item");
+
+                mainMenuBar.add(exportMenu);
+                exportMenu.getAccessibleContext().setAccessibleName("Export Menu");
+                exportMenu.getAccessibleContext().setAccessibleDescription("Export menu.");
+
                 setJMenuBar(mainMenuBar);
                 mainMenuBar.getAccessibleContext().setAccessibleName("TubeTrackerGUI Menu Bar");
                 mainMenuBar.getAccessibleContext().setAccessibleDescription("TubeTrackerGUI menu bar.");
@@ -151,7 +197,6 @@ public class TubeTrackerGUI extends JFrame{
             imagePane = new ImagePane();
             frame.add(imagePane);
             frame.setVisible(true);
-
         }
     }
 
@@ -180,6 +225,25 @@ public class TubeTrackerGUI extends JFrame{
         }
     }
 
+    private void exportDataFileActionPerformed(java.awt.event.ActionEvent evt) {
+        System.out.println("Export Data File");
+    }
+
+    private void exportLabeledImagesActionPerformed(java.awt.event.ActionEvent evt) {
+        System.out.println("Export Labeled Images");
+    }
+
+    private void exportProcessedImagesActionPerformed(java.awt.event.ActionEvent evt) {
+        javax.swing.JFileChooser chooser = new javax.swing.JFileChooser();
+        chooser.addChoosableFileFilter(new ImageViewer.ImageFileFilter());
+        int option = chooser.showSaveDialog(this);
+        if (option == javax.swing.JFileChooser.APPROVE_OPTION) {
+            java.io.File file = chooser.getSelectedFile();
+            String f = file.getAbsolutePath();
+            TiffStackWriter.writeTiffStack(this.imagePane.biProcessedImages, new File(f));
+        }
+    }
+
     public class ImagePane extends JPanel {
 
         private List<Point> points; //change to duples of points
@@ -187,6 +251,7 @@ public class TubeTrackerGUI extends JFrame{
         private RegionSelectorListener listener;
         private Vector<BufferedImage> images;
         private Vector<Image> processedImages;
+        private Vector<BufferedImage> biProcessedImages;
 
         public ImagePane() {
             points = new ArrayList<>(25);
@@ -197,11 +262,13 @@ public class TubeTrackerGUI extends JFrame{
                     images = TiffStackReader.readStack(new File(imagePath));
                     System.out.println("Processing images... Please wait.");
                     processedImages = TubeTracker.processImages(images);
+                    biProcessedImages = convertToBufferedImage(processedImages);
                     System.out.println("Done processing images.");
                     displayImage = images.head();
+                    //test of image writing
+                    TiffStackWriter.writeTiffStack(biProcessedImages, new File("test.tif"));
                 }
-            }
-            catch (Exception ex) {
+            } catch (Exception ex) {
                 ex.printStackTrace();
             }
 
@@ -229,11 +296,18 @@ public class TubeTrackerGUI extends JFrame{
                 g2d.drawImage(displayImage, 0, 0, this);
             }
             g2d.setColor(Color.RED);
-            //change to use point duples not points
             for (Point p : points) {
                 g2d.fillOval(p.x - 3, p.y - 3, 6, 6);
             }
             g2d.dispose();
+        }
+
+        private Vector<BufferedImage> convertToBufferedImage(Vector<Image> vec) {
+            VectorBuilder<BufferedImage> builder = new VectorBuilder<>();
+            scala.collection.JavaConverters.asJavaCollection(vec).forEach(
+                    img -> { builder.$plus$eq(img.awt()); }
+            );
+            return builder.result();
         }
 
     }
