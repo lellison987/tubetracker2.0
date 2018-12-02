@@ -237,7 +237,14 @@ public class TubeTrackerGUI extends JFrame{
     }
 
     private void exportProcessedImagesActionPerformed(java.awt.event.ActionEvent evt) {
-        System.out.println("Export Processed Images");
+        javax.swing.JFileChooser chooser = new javax.swing.JFileChooser();
+        chooser.addChoosableFileFilter(new ImageViewer.ImageFileFilter());
+        int option = chooser.showSaveDialog(this);
+        if (option == javax.swing.JFileChooser.APPROVE_OPTION) {
+            java.io.File file = chooser.getSelectedFile();
+            String f = file.getAbsolutePath();
+            TiffStackWriter.writeTiffStack(this.imagePane.biProcessedImages, new File(f));
+        }
     }
 
     public class ImagePane extends JPanel {
@@ -247,6 +254,7 @@ public class TubeTrackerGUI extends JFrame{
         private RegionSelectorListener listener;
         private Vector<BufferedImage> images;
         private Vector<Image> processedImages;
+        private Vector<BufferedImage> biProcessedImages;
 
         public ImagePane() {
             points = new ArrayList<>(25);
@@ -257,10 +265,11 @@ public class TubeTrackerGUI extends JFrame{
                     images = TiffStackReader.readStack(new File(imagePath));
                     System.out.println("Processing images... Please wait.");
                     processedImages = TubeTracker.processImages(images);
+                    biProcessedImages = convertToBufferedImage(processedImages);
                     System.out.println("Done processing images.");
                     displayImage = images.head();
                     //test of image writing
-                    TiffStackWriter.writeTiffStack(convertToBufferedImage(processedImages), new File("test.tif"));
+                    TiffStackWriter.writeTiffStack(biProcessedImages, new File("test.tif"));
                 }
             } catch (Exception ex) {
                 ex.printStackTrace();
