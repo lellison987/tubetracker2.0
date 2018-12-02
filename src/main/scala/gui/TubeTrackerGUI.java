@@ -2,6 +2,7 @@ package gui;
 
 import com.sksamuel.scrimage.Image;
 import objects.ImageTrackerOptions;
+import objects.ImageTubeList;
 import prediction.TubeTracker;
 import scala.Function1;
 import scala.collection.immutable.Vector;
@@ -200,12 +201,8 @@ public class TubeTrackerGUI extends JFrame{
     }
 
     private void runMenuItemActionPerformed(java.awt.event.ActionEvent evt) {
-        java.util.List<objects.ImageTubeList> trackedTubes = prediction.TubeTracker.trackFromProcessedImages(imagePane.processedImages, imagePane.listener.getPointsList(), ImageTrackerOptions.getOptions());
-        trackedTubes.forEach(tubelist -> {
-            scala.collection.JavaConverters.asJavaCollection(tubelist.tubeList()).forEach(
-                    tb -> { System.out.println(tb.length()); }
-            );
-        });
+        Vector<ImageTubeList> trackedTubes = prediction.TubeTracker.trackFromProcessedImagesVector(imagePane.processedImages, imagePane.listener.getPointsList(), ImageTrackerOptions.getOptions());
+        System.out.println(ImageTubeList.makeCSVString(trackedTubes));
     }
 
     private void undoMenuItemActionPerformed(java.awt.event.ActionEvent evt) {
