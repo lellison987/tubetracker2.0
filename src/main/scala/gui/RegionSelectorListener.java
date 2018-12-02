@@ -9,16 +9,16 @@ import java.awt.event.MouseListener;
 import java.util.LinkedList;
 
 public class RegionSelectorListener extends JPanel implements MouseListener {
-    final TubeTrackerGUI.ImagePane label;
+    private final ImagePane label;
     private Point origin = null;
     private LinkedList<Tuple2<Point, Point>> pointsList = null;
 
-    public RegionSelectorListener(TubeTrackerGUI.ImagePane theFrame) {
+    public RegionSelectorListener(ImagePane theFrame) {
         this.label = theFrame;
         this.pointsList = new LinkedList<>();
     }
 
-    public static RegionSelectorListener install ( final TubeTrackerGUI.ImagePane theFrame)
+    public static RegionSelectorListener install ( final ImagePane theFrame)
     {
         final RegionSelectorListener dr = new RegionSelectorListener ( theFrame );
         theFrame.addMouseListener ( dr );

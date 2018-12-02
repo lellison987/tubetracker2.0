@@ -16,7 +16,10 @@ import java.awt.Point;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
+import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import javax.swing.*;
@@ -36,7 +39,7 @@ public class TubeTrackerGUI extends JFrame{
     private javax.swing.JMenuItem dataFileMenuItem;
     private javax.swing.JMenuItem labeledImageMenuItem;
     private javax.swing.JMenuItem processedImagesMenuItem;
-    private String imagePath;
+    Vector<ImageTubeList> results;
     private JFrame frame;
     private ImagePane imagePane;
 
@@ -144,15 +147,15 @@ public class TubeTrackerGUI extends JFrame{
                 dataFileMenuItem.getAccessibleContext().setAccessibleName("Export File Menu Item");
                 dataFileMenuItem.getAccessibleContext().setAccessibleDescription("Export file menu item.");
 
-                labeledImageMenuItem.setText("Labeled Image");
+                labeledImageMenuItem.setText("Labeled Images");
                 labeledImageMenuItem.addActionListener(new java.awt.event.ActionListener() {
                     public void actionPerformed(java.awt.event.ActionEvent evt) {
                         exportLabeledImagesActionPerformed(evt);
                     }
                 });
                 exportMenu.add(labeledImageMenuItem);
-                labeledImageMenuItem.getAccessibleContext().setAccessibleName("Export Labeled Image Menu Item");
-                labeledImageMenuItem.getAccessibleContext().setAccessibleDescription("Export labeled image menu item");
+                labeledImageMenuItem.getAccessibleContext().setAccessibleName("Export Labeled Images Menu Item");
+                labeledImageMenuItem.getAccessibleContext().setAccessibleDescription("Export labeled images menu item");
 
                 processedImagesMenuItem.setText("Processed Images");
                 processedImagesMenuItem.addActionListener(new java.awt.event.ActionListener() {
@@ -182,7 +185,9 @@ public class TubeTrackerGUI extends JFrame{
         System.exit(0);
     }
 
-
+    public Dimension getPreferredSize() {
+        return new Dimension(520, 520);
+    }
 
     private void openMenuItemActionPerformed(java.awt.event.ActionEvent evt) {
         javax.swing.JFileChooser chooser = new javax.swing.JFileChooser();
@@ -191,18 +196,18 @@ public class TubeTrackerGUI extends JFrame{
         if (option == javax.swing.JFileChooser.APPROVE_OPTION) {
             java.io.File file = chooser.getSelectedFile();
             if (file == null) return;
-            imagePath = file.getAbsolutePath();
-            frame.remove(imagePane);
+            String imagePath = file.getAbsolutePath();
+            if(imagePane != null) frame.remove(imagePane);
             frame.setVisible(false);
-            imagePane = new ImagePane();
+            imagePane = new ImagePane(imagePath);
             frame.add(imagePane);
             frame.setVisible(true);
         }
     }
 
     private void runMenuItemActionPerformed(java.awt.event.ActionEvent evt) {
-        Vector<ImageTubeList> trackedTubes = prediction.TubeTracker.trackFromProcessedImagesVector(imagePane.processedImages, imagePane.listener.getPointsList(), ImageTrackerOptions.getOptions());
-        System.out.println(ImageTubeList.makeCSVString(trackedTubes));
+        results = TubeTracker.trackFromProcessedImagesVector(imagePane.processedImages, imagePane.listener.getPointsList(), ImageTrackerOptions.getOptions());
+        System.out.println("Done processing results.");
     }
 
     private void undoMenuItemActionPerformed(java.awt.event.ActionEvent evt) {
@@ -226,90 +231,52 @@ public class TubeTrackerGUI extends JFrame{
     }
 
     private void exportDataFileActionPerformed(java.awt.event.ActionEvent evt) {
-        System.out.println("Export Data File");
+        System.out.println("Exporting Data File");
+        if(results == null) {
+            System.err.println("WARNING: you must generate results with Run (CTRL-R) before exporting!");
+            return;
+        }
+        javax.swing.JFileChooser chooser = new javax.swing.JFileChooser();
+        chooser.addChoosableFileFilter(new ImageViewer.ImageFileFilter());
+        int option = chooser.showSaveDialog(this);
+        if (option == javax.swing.JFileChooser.APPROVE_OPTION) {
+            try {
+                java.io.File file = chooser.getSelectedFile();
+                BufferedWriter bw = new BufferedWriter(new FileWriter(file));
+                bw.write(ImageTubeList.makeCSVString(results));
+                bw.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
     }
 
     private void exportLabeledImagesActionPerformed(java.awt.event.ActionEvent evt) {
-        System.out.println("Export Labeled Images");
-    }
-
-    private void exportProcessedImagesActionPerformed(java.awt.event.ActionEvent evt) {
+        System.out.println("Exporting Labeled Images");
+        if(results == null) {
+            System.err.println("WARNING: you must generate results with Run (CTRL-R) before exporting!");
+            return;
+        }
         javax.swing.JFileChooser chooser = new javax.swing.JFileChooser();
         chooser.addChoosableFileFilter(new ImageViewer.ImageFileFilter());
         int option = chooser.showSaveDialog(this);
         if (option == javax.swing.JFileChooser.APPROVE_OPTION) {
             java.io.File file = chooser.getSelectedFile();
             String f = file.getAbsolutePath();
-            TiffStackWriter.writeTiffStack(this.imagePane.biProcessedImages, new File(f));
+            TiffStackWriter.writeTiffStack(ImagePane.convertToBufferedImage(TubeTracker.labelImages(results)), new File(f));
         }
     }
 
-    public class ImagePane extends JPanel {
-
-        private List<Point> points; //change to duples of points
-        private BufferedImage displayImage;
-        private RegionSelectorListener listener;
-        private Vector<BufferedImage> images;
-        private Vector<Image> processedImages;
-        private Vector<BufferedImage> biProcessedImages;
-
-        public ImagePane() {
-            points = new ArrayList<>(25);
-            listener = new RegionSelectorListener(this);
-            try {
-                if (imagePath!=null) {
-                    System.out.println("Reading images...");
-                    images = TiffStackReader.readStack(new File(imagePath));
-                    System.out.println("Processing images... Please wait.");
-                    processedImages = TubeTracker.processImages(images);
-                    biProcessedImages = convertToBufferedImage(processedImages);
-                    System.out.println("Done processing images.");
-                    displayImage = images.head();
-                    //test of image writing
-                    TiffStackWriter.writeTiffStack(biProcessedImages, new File("test.tif"));
-                }
-            } catch (Exception ex) {
-                ex.printStackTrace();
-            }
-
-            addMouseListener(new MouseAdapter() {
-                @Override
-                public void mouseClicked(MouseEvent e) {
-                    //use function from regionSelectorListener with point duples
-                    listener.mouseClicked(e);
-                    points.add(e.getPoint());
-                    repaint();
-                }
-            });
+    private void exportProcessedImagesActionPerformed(java.awt.event.ActionEvent evt) {
+        System.out.println("Exporting Processed Images");
+        javax.swing.JFileChooser chooser = new javax.swing.JFileChooser();
+        chooser.addChoosableFileFilter(new ImageViewer.ImageFileFilter());
+        int option = chooser.showSaveDialog(this);
+        if (option == javax.swing.JFileChooser.APPROVE_OPTION) {
+            java.io.File file = chooser.getSelectedFile();
+            String f = file.getAbsolutePath();
+            TiffStackWriter.writeTiffStack(ImagePane.convertToBufferedImage(this.imagePane.processedImages), new File(f));
         }
-
-        @Override
-        public Dimension getPreferredSize() {
-            return displayImage == null ? new Dimension(520, 520) : new Dimension(displayImage.getWidth(), displayImage.getHeight());
-        }
-
-        @Override
-        protected void paintComponent(Graphics g) {
-            super.paintComponent(g);
-            Graphics2D g2d = (Graphics2D) g.create();
-            if (displayImage != null) {
-                g2d.drawImage(displayImage, 0, 0, this);
-            }
-            g2d.setColor(Color.RED);
-            for (Point p : points) {
-                g2d.fillOval(p.x - 3, p.y - 3, 6, 6);
-            }
-            g2d.dispose();
-        }
-
-        private Vector<BufferedImage> convertToBufferedImage(Vector<Image> vec) {
-            VectorBuilder<BufferedImage> builder = new VectorBuilder<>();
-            scala.collection.JavaConverters.asJavaCollection(vec).forEach(
-                    img -> { builder.$plus$eq(img.awt()); }
-            );
-            return builder.result();
-        }
-
     }
 
 }
