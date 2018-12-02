@@ -1,6 +1,12 @@
 package gui;
 
+import com.sksamuel.scrimage.Image;
+import objects.ImageTrackerOptions;
+import objects.ImageTubeList;
+import prediction.TubeTracker;
+import scala.Function1;
 import scala.collection.immutable.Vector;
+import scala.collection.immutable.VectorBuilder;
 
 import java.awt.Color;
 import java.awt.Dimension;
@@ -10,11 +16,12 @@ import java.awt.Point;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
+import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import javax.imageio.ImageIO;
 import javax.swing.*;
 
 //import static com.sun.java.accessibility.util.AWTEventMonitor.addWindowListener;
@@ -22,13 +29,17 @@ import javax.swing.*;
 //ignore the missing package. It works.
 public class TubeTrackerGUI extends JFrame{
     private javax.swing.JDesktopPane desktop;
-    private javax.swing.JMenuItem exitMenuItem;
+    private javax.swing.JMenuItem undoMenuItem;
     private javax.swing.JMenu fileMenu;
     private javax.swing.JSeparator jSeparator1;
     private javax.swing.JMenuBar mainMenuBar;
     private javax.swing.JMenuItem openMenuItem;
     private javax.swing.JMenuItem runMenuItem;
-    private String imagePath;
+    private javax.swing.JMenu exportMenu;
+    private javax.swing.JMenuItem dataFileMenuItem;
+    private javax.swing.JMenuItem labeledImageMenuItem;
+    private javax.swing.JMenuItem processedImagesMenuItem;
+    Vector<ImageTubeList> results;
     private JFrame frame;
     private ImagePane imagePane;
 
@@ -57,21 +68,13 @@ public class TubeTrackerGUI extends JFrame{
                 fileMenu = new javax.swing.JMenu();
                 openMenuItem = new javax.swing.JMenuItem();
                 runMenuItem = new javax.swing.JMenuItem();
+                exportMenu = new javax.swing.JMenu();
+                dataFileMenuItem = new javax.swing.JMenuItem();
+                labeledImageMenuItem = new javax.swing.JMenuItem();
+                processedImagesMenuItem = new javax.swing.JMenuItem();
                 jSeparator1 = new javax.swing.JSeparator();
-                exitMenuItem = new javax.swing.JMenuItem();
-//                JButton b1 = new javax.swing.JButton("Hello");
-//                b1.setSize(100,25);
-//                b1.setVisible(true);
-//                desktop.add(b1);
+                undoMenuItem = new javax.swing.JMenuItem();
                 desktop.setVisible(true);
-
-//                b1.addActionListener(new ActionListener()
-//                {
-//                    public void actionPerformed(ActionEvent e)
-//                    {
-//                        System.out.println("Hello");
-//                    }
-//                });
 
                 setTitle("Image Viewer");
                 addWindowListener(new java.awt.event.WindowAdapter() {
@@ -113,23 +116,60 @@ public class TubeTrackerGUI extends JFrame{
                 runMenuItem.getAccessibleContext().setAccessibleName("Run Menu Item");
                 runMenuItem.getAccessibleContext().setAccessibleDescription("Run menu item.");
 
-                fileMenu.add(jSeparator1);
+                undoMenuItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_Z, java.awt.event.InputEvent.CTRL_MASK));
+                undoMenuItem.setMnemonic('z');
+                undoMenuItem.setText("Undo");
+                undoMenuItem.addActionListener(new java.awt.event.ActionListener() {
+                    public void actionPerformed(java.awt.event.ActionEvent evt) {
+                        undoMenuItemActionPerformed(evt);
+                    }
+                });
 
-//                exitMenuItem.setMnemonic('x');
-//                exitMenuItem.setText("Exit");
-//                exitMenuItem.addActionListener(new java.awt.event.ActionListener() {
-//                    public void actionPerformed(java.awt.event.ActionEvent evt) {
-//                        exitMenuItemActionPerformed(evt);
-//                    }
-//                });
-//
-//                fileMenu.add(exitMenuItem);
-//                exitMenuItem.getAccessibleContext().setAccessibleName("Exit Menu Item");
-//                exitMenuItem.getAccessibleContext().setAccessibleDescription("Exit menu item.");
+                fileMenu.add(undoMenuItem);
+                undoMenuItem.getAccessibleContext().setAccessibleName("Undo Menu Item");
+                undoMenuItem.getAccessibleContext().setAccessibleDescription("Undo menu item.");
+
+                fileMenu.add(jSeparator1);
 
                 mainMenuBar.add(fileMenu);
                 fileMenu.getAccessibleContext().setAccessibleName("File Menu");
                 fileMenu.getAccessibleContext().setAccessibleDescription("File menu.");
+
+                exportMenu.setMnemonic('e');
+                exportMenu.setText("Export");
+                dataFileMenuItem.setText("Data File");
+                dataFileMenuItem.addActionListener(new java.awt.event.ActionListener() {
+                    public void actionPerformed(java.awt.event.ActionEvent evt) {
+                        exportDataFileActionPerformed(evt);
+                    }
+                });
+                exportMenu.add(dataFileMenuItem);
+                dataFileMenuItem.getAccessibleContext().setAccessibleName("Export File Menu Item");
+                dataFileMenuItem.getAccessibleContext().setAccessibleDescription("Export file menu item.");
+
+                labeledImageMenuItem.setText("Labeled Images");
+                labeledImageMenuItem.addActionListener(new java.awt.event.ActionListener() {
+                    public void actionPerformed(java.awt.event.ActionEvent evt) {
+                        exportLabeledImagesActionPerformed(evt);
+                    }
+                });
+                exportMenu.add(labeledImageMenuItem);
+                labeledImageMenuItem.getAccessibleContext().setAccessibleName("Export Labeled Images Menu Item");
+                labeledImageMenuItem.getAccessibleContext().setAccessibleDescription("Export labeled images menu item");
+
+                processedImagesMenuItem.setText("Processed Images");
+                processedImagesMenuItem.addActionListener(new java.awt.event.ActionListener() {
+                    public void actionPerformed(java.awt.event.ActionEvent evt) {
+                        exportProcessedImagesActionPerformed(evt);
+                    }
+                });
+                exportMenu.add(processedImagesMenuItem);
+                processedImagesMenuItem.getAccessibleContext().setAccessibleName("Export Processed Images Menu Item");
+                processedImagesMenuItem.getAccessibleContext().setAccessibleDescription("Export processed images menu item");
+
+                mainMenuBar.add(exportMenu);
+                exportMenu.getAccessibleContext().setAccessibleName("Export Menu");
+                exportMenu.getAccessibleContext().setAccessibleDescription("Export menu.");
 
                 setJMenuBar(mainMenuBar);
                 mainMenuBar.getAccessibleContext().setAccessibleName("TubeTrackerGUI Menu Bar");
@@ -145,9 +185,9 @@ public class TubeTrackerGUI extends JFrame{
         System.exit(0);
     }
 
-//    private void exitMenuItemActionPerformed(java.awt.event.WindowEvent evt) {
-//        System.exit(0);
-//    }
+    public Dimension getPreferredSize() {
+        return new Dimension(520, 520);
+    }
 
     private void openMenuItemActionPerformed(java.awt.event.ActionEvent evt) {
         javax.swing.JFileChooser chooser = new javax.swing.JFileChooser();
@@ -156,82 +196,87 @@ public class TubeTrackerGUI extends JFrame{
         if (option == javax.swing.JFileChooser.APPROVE_OPTION) {
             java.io.File file = chooser.getSelectedFile();
             if (file == null) return;
-            imagePath = file.getAbsolutePath();
-            frame.remove(imagePane);
+            String imagePath = file.getAbsolutePath();
+            if(imagePane != null) frame.remove(imagePane);
             frame.setVisible(false);
-            imagePane = new ImagePane();
+            imagePane = new ImagePane(imagePath);
             frame.add(imagePane);
             frame.setVisible(true);
-
-//            ImageScrollFrame ifr = new ImageScrollFrame(imagePath);
-//            desktop.add(ifr, javax.swing.JLayeredPane.DEFAULT_LAYER);
-//            setContentPane(ifr);
-//            ifr.setVisible( true );
-//            ifr.setSize(530, 550);
-//            ifr.setLocation(100, 100);
-//            desktop.setSelectedFrame(ifr);
-
         }
     }
 
     private void runMenuItemActionPerformed(java.awt.event.ActionEvent evt) {
-        System.out.println("Run");
+        results = TubeTracker.trackFromProcessedImagesVector(imagePane.processedImages, imagePane.listener.getPointsList(), ImageTrackerOptions.getOptions());
+        System.out.println("Done processing results.");
     }
 
-    public class ImagePane extends JPanel {
+    private void undoMenuItemActionPerformed(java.awt.event.ActionEvent evt) {
+        if(imagePane.listener.completedPointPair()) {
+            //point pair was completed, must remove last two points
+            imagePane.listener.reset();
+            imagePane.listener.dropLastFromPointsList();
+            //remove last point
+            if(imagePane.points.size() > 0) imagePane.points.remove(imagePane.points.size() - 1);
+            if(imagePane.points.size() > 0) imagePane.points.remove(imagePane.points.size() - 1);
+            //redraw
+            imagePane.repaint();
+        } else {
+            //point pair was not completed and origin != null
+            imagePane.listener.reset();
+            //remove last point
+            if(imagePane.points.size() > 0) imagePane.points.remove(imagePane.points.size() - 1);
+            //redraw
+            imagePane.repaint();
+        }
+    }
 
-        private List<Point> points; //change to duples of points
-        private BufferedImage displayImage;
-        private RegionSelectorListener listener;
-        private Vector<BufferedImage> images;
-
-        public ImagePane() {
-            points = new ArrayList<>(25);
-            listener = new RegionSelectorListener(this);
+    private void exportDataFileActionPerformed(java.awt.event.ActionEvent evt) {
+        System.out.println("Exporting Data File");
+        if(results == null) {
+            System.err.println("WARNING: you must generate results with Run (CTRL-R) before exporting!");
+            return;
+        }
+        javax.swing.JFileChooser chooser = new javax.swing.JFileChooser();
+        chooser.addChoosableFileFilter(new ImageViewer.ImageFileFilter());
+        int option = chooser.showSaveDialog(this);
+        if (option == javax.swing.JFileChooser.APPROVE_OPTION) {
             try {
-                if (imagePath!=null) {
-                    images = TiffStackReader.readStack(new File(imagePath));
-                    displayImage = images.head();
-                }
-//                else {
-//                    displayImage = ImageIO.read(new File("mt1.jpg"));
-//                }
+                java.io.File file = chooser.getSelectedFile();
+                BufferedWriter bw = new BufferedWriter(new FileWriter(file));
+                bw.write(ImageTubeList.makeCSVString(results));
+                bw.close();
+            } catch (IOException e) {
+                e.printStackTrace();
             }
-            catch (Exception ex) {
-                ex.printStackTrace();
-            }
-
-            addMouseListener(new MouseAdapter() {
-                @Override
-                public void mouseClicked(MouseEvent e) {
-                    //use function from regionSelectorListener with point duples
-                    listener.mouseClicked(e);
-                    points.add(e.getPoint());
-                    repaint();
-                }
-            });
         }
+    }
 
-        @Override
-        public Dimension getPreferredSize() {
-            return displayImage == null ? new Dimension(200, 200) : new Dimension(displayImage.getWidth(), displayImage.getHeight());
+    private void exportLabeledImagesActionPerformed(java.awt.event.ActionEvent evt) {
+        System.out.println("Exporting Labeled Images");
+        if(results == null) {
+            System.err.println("WARNING: you must generate results with Run (CTRL-R) before exporting!");
+            return;
         }
-
-        @Override
-        protected void paintComponent(Graphics g) {
-            super.paintComponent(g);
-            Graphics2D g2d = (Graphics2D) g.create();
-            if (displayImage != null) {
-                g2d.drawImage(displayImage, 0, 0, this);
-            }
-            g2d.setColor(Color.RED);
-            //change to use point duples not points
-            for (Point p : points) {
-                g2d.fillOval(p.x - 3, p.y - 3, 6, 6);
-            }
-            g2d.dispose();
+        javax.swing.JFileChooser chooser = new javax.swing.JFileChooser();
+        chooser.addChoosableFileFilter(new ImageViewer.ImageFileFilter());
+        int option = chooser.showSaveDialog(this);
+        if (option == javax.swing.JFileChooser.APPROVE_OPTION) {
+            java.io.File file = chooser.getSelectedFile();
+            String f = file.getAbsolutePath();
+            TiffStackWriter.writeTiffStack(ImagePane.convertToBufferedImage(TubeTracker.labelImages(results)), new File(f));
         }
+    }
 
+    private void exportProcessedImagesActionPerformed(java.awt.event.ActionEvent evt) {
+        System.out.println("Exporting Processed Images");
+        javax.swing.JFileChooser chooser = new javax.swing.JFileChooser();
+        chooser.addChoosableFileFilter(new ImageViewer.ImageFileFilter());
+        int option = chooser.showSaveDialog(this);
+        if (option == javax.swing.JFileChooser.APPROVE_OPTION) {
+            java.io.File file = chooser.getSelectedFile();
+            String f = file.getAbsolutePath();
+            TiffStackWriter.writeTiffStack(ImagePane.convertToBufferedImage(this.imagePane.processedImages), new File(f));
+        }
     }
 
 }

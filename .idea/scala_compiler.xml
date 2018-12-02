@@ -1,6 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ScalaCompilerConfiguration">
-    <profile name="sbt 1" modules="tubetracker2-0_494,tubetracker2.0,tubetracker2-0" />
+    <profile name="sbt 1" modules="tubetracker2-0_494" />
+    <profile name="sbt 2" modules="tubetracker2-0">
+      <plugins>
+        <plugin path="C:\Users\john\.ivy2\cache\org.scalamacros\paradise_2.12.6\jars\paradise_2.12.6-2.1.1.jar" />
+      </plugins>
+    </profile>
+    <profile name="sbt 3" modules="tubetracker2.0">
+      <plugins>
+        <plugin path="C:\Users\Lauren\.ivy2\cache\org.scalamacros\paradise_2.12.6\jars\paradise_2.12.6-2.1.1.jar" />
+      </plugins>
+    </profile>
   </component>
 </project>

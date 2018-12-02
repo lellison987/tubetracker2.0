@@ -55,7 +55,7 @@ class ComponentSizeFilter(val minSize: Int, val structuralElement: StructuralEle
     components.toVector
   }
 
-  def listConnectedComponents(img: Image): Vector[Vector[(Int, Int)]] = {
+  def listConnectedComponents(img: Image, compMinSize: Int = minSize): Vector[Vector[(Int, Int)]] = {
     val connComponents = new mutable.ListBuffer[Vector[(Int, Int)]]()
     val flags = Array.fill(img.width, img.height)(false)
     var done = false
@@ -67,7 +67,7 @@ class ComponentSizeFilter(val minSize: Int, val structuralElement: StructuralEle
         case Some((p, i)) =>
           val (x,y) = PixelTools.offsetToCoordinate(i, img.width)
           val lst = getConnectedComponent(img, flags, x, y)
-          if(lst.length >= minSize) connComponents += lst
+          if(lst.length >= compMinSize) connComponents += lst
         case _ => done = true
       }
     }
