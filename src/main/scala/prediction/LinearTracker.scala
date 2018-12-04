@@ -43,7 +43,6 @@ class LinearTracker(
   def findNewTube(tube: Tubule, newimg: Image): Tubule = {
     //threshold
     //apply morphological operations? How to avoid applying over entire image? necessary?
-    //TODO: experiment with morphological operations (open, then close) -- maybe on subimage
     val timg = newimg
     val pts = tube.points
     //try a center point first
@@ -69,40 +68,10 @@ class LinearTracker(
   }
 
 
-  /*
-  def findNewTubeFromPoints(tube: Tubule, newimg: Image): Tubule = {
-    //threshold
-    //apply morphological operations? How to avoid applying over entire image? necessary?
-    //TODO: experiment with morphological operations (open, then close) -- maybe on subimage
-    //val timg = newimg.filter(filter.ThresholdFilter(thresholdValue)).applyFilter(open).applyFilter(close)
-    val timg = newimg
-    val slope = (tube.p2._2 - tube.p1._2).toDouble / (tube.p2._1 - tube.p1._1)
-    val intercept = tube.p1._2 - (tube.p1._1 * slope)
-    //try a center point first
-    //timg.output(new File("here.jpg"))
-    val pts = for{
-      x <- math.min(tube.p2._1, tube.p1._1) to math.max(tube.p2._1, tube.p1._1)
-    } yield (x, math.round(x*slope + intercept).toInt)
-    //otherwise try all the points to get one that works
-    val newptsSet = mutable.Set[(Int, Int)]()
-    pts foreach {
-      pt =>
-        val conn = sizeFilter.getConnectedComponent(timg, Array.fill(timg.width, timg.height)(false), pt._1, pt._2)
-        if(conn.length >= sizeFilter.minSize) newptsSet ++= conn
-    }
-    val newpts = newptsSet.toVector
-    val additionalPoints = Set(newpts:_*).diff(Set(tube.points:_*))
-    val newtubepts = (additionalPoints filter (pt => predictor.predict(pt, tube.p1, tube.p2))).toVector ++ tube.points.intersect(newpts)
-    val (m, b, p) = LinearRegression.doRegression(newtubepts)
-    val newtubeendpts = if (newtubepts.nonEmpty) LinearRegression.getLineEndpoints(newtubepts, (m, b)) else ((0,0), (0,0))
-    Tubule(newtubepts, newtubeendpts._1, newtubeendpts._2)
-  }
-  */
 
   def findNewTubeFromPoints(tube: Tubule, newimg: Image): Tubule = {
     //threshold
     //apply morphological operations? How to avoid applying over entire image? necessary?
-    //TODO: experiment with morphological operations (open, then close) -- maybe on subimage
     //val timg = newimg.filter(filter.ThresholdFilter(thresholdValue)).applyFilter(open).applyFilter(close)
     val timg = newimg
     val slope = (tube.p2._2 - tube.p1._2).toDouble / (tube.p2._1 - tube.p1._1)
@@ -136,16 +105,19 @@ class LinearTracker(
   }
 
   private def getLargestConnectedComponent(img: Image, pts: Vector[(Int, Int)]): Vector[(Int, Int)] = {
-    val minX = pts.map(_._1).min
-    val maxX = pts.map(_._1).max
-    val minY = pts.map(_._2).min
-    val maxY = pts.map(_._2).max
-    val subimg = img.subimage(minX, minY, maxX - minX + 1, maxY - minY + 1).blank
-    pts foreach {
-      case (x, y) => subimg.setPixel(x - minX, y - minY, Pixel(255,255,255,0))
+    if(pts.isEmpty) Vector.empty
+    else {
+      val minX = pts.map(_._1).min
+      val maxX = pts.map(_._1).max
+      val minY = pts.map(_._2).min
+      val maxY = pts.map(_._2).max
+      val subimg = img.subimage(minX, minY, maxX - minX + 1, maxY - minY + 1).blank
+      pts foreach {
+        case (x, y) => subimg.setPixel(x - minX, y - minY, Pixel(255, 255, 255, 0))
+      }
+      val comps = sizeFilter.listConnectedComponents(subimg, 1)
+      val maxcomp = if (comps.nonEmpty) comps.maxBy(_.length) else Vector.empty
+      maxcomp map (px => (px._1 + minX, px._2 + minY))
     }
-    val comps = sizeFilter.listConnectedComponents(subimg, 1)
-    val maxcomp = if(comps.nonEmpty) comps.maxBy(_.length) else Vector.empty
-    maxcomp map (px => (px._1 + minX, px._2 + minY))
   }
 }

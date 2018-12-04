@@ -16,6 +16,9 @@ import java.util.List;
 public class TiffStackWriter {
 
     public static void writeTiffStack(Vector<BufferedImage> images, File file) {
+        if(!ImageIO.getImageWritersByFormatName("TIFF").hasNext()) {
+            ImageIO.scanForPlugins();
+        }
 
         Iterator<ImageWriter> writers = ImageIO.getImageWritersByFormatName("TIFF");
 

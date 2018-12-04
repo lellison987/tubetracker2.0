@@ -14,6 +14,14 @@ libraryDependencies += "com.twelvemonkeys.imageio" % "imageio-core" % "3.4.1"
 libraryDependencies += "com.twelvemonkeys.imageio" % "imageio-jpeg" % "3.4.1"
 // https://mvnrepository.com/artifact/com.twelvemonkeys.imageio/imageio-tiff
 libraryDependencies += "com.twelvemonkeys.imageio" % "imageio-tiff" % "3.4.1"
+libraryDependencies += "com.twelvemonkeys.servlet" % "servlet" % "3.4.1"
+// https://mvnrepository.com/artifact/com.twelvemonkeys.common/common-lang
+libraryDependencies += "com.twelvemonkeys.common" % "common-lang" % "3.4.1"
+// https://mvnrepository.com/artifact/com.twelvemonkeys.common/common-io
+libraryDependencies += "com.twelvemonkeys.common" % "common-io" % "3.4.1"
+// https://mvnrepository.com/artifact/com.twelvemonkeys.common/common-image
+libraryDependencies += "com.twelvemonkeys.common" % "common-image" % "3.4.1"
+
 libraryDependencies ++= Seq(
   "com.typesafe.akka" %% "akka-actor" % "2.5.18",
   "com.typesafe.akka" %% "akka-testkit" % "2.5.18" % Test

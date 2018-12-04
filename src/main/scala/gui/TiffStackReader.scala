@@ -3,6 +3,7 @@ package gui
 import java.awt.image.BufferedImage
 import java.io.File
 
+import com.twelvemonkeys.imageio.plugins.tiff.{TIFFImageReaderSpi, TIFFImageWriterSpi}
 import javax.imageio.ImageIO
 
 object TiffStackReader {
@@ -10,6 +11,13 @@ object TiffStackReader {
     /* taken from twelvemonkeys imageio library github page*/
     // Create input stream
     val input = ImageIO.createImageInputStream(file)
+    if(!ImageIO.getImageReaders(input).hasNext) {
+      import javax.imageio.spi.IIORegistry
+      val registry = IIORegistry.getDefaultInstance
+      registry.registerServiceProvider(new TIFFImageReaderSpi())
+      registry.registerServiceProvider(new TIFFImageWriterSpi())
+      ImageIO.scanForPlugins()
+    }
 
     try {
       // Get the reader
