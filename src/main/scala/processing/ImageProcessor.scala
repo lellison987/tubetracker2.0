@@ -35,6 +35,7 @@ object ImageProcessor {
     implicit val system: ActorSystem = ActorSystem("TubeTrackerSystem")
     implicit val timeout: Timeout = Timeout(24.hours)
     new ImageProcessor(img => img
+      .filter(filter.DespeckleFilter)
       .applyKernel(kernBlur)
       .applyKernel(kernSharpen)
       .filter(filter.GrayscaleFilter)

@@ -10,6 +10,8 @@ parser.add_argument("-t","--tubes", nargs='+', type=int, help="Tube number(s) [1
 args = parser.parse_args()
 
 data=genfromtxt(args.input_file ,delimiter=',')
+if data.ndim == 1:
+    data = data.reshape((1,-1))
 df = np.transpose(data)
 
 try:
