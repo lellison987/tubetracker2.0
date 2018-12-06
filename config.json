@@ -3,6 +3,7 @@
   "beta" : 100.0,
   "pValueLimit" : 0.05,
   "thresholdValue" : 60,
+  "constrastValue" : 0.75,
   "structuralElement" : {
     "element" : [
       [

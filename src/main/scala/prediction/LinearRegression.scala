@@ -34,6 +34,8 @@ object LinearRegression {
     xpts.union(ypts).toVector
   }
 
+
+
   def getLineEndpoints(data: Vector[(Int, Int)], mb: (Double, Double)): ((Int, Int), (Int, Int)) = {
     val (m, b) = mb
     val minX = data.map(_._1).min
@@ -43,4 +45,7 @@ object LinearRegression {
 
   def produceConstrainedLinePoints(data: Vector[(Int, Int)], mbp: (Double, Double, Double)): Vector[(Int, Int)] =
     produceConstrainedLinePoints(data, (mbp._1, mbp._2))
+
+  def produceAllConstrainedLinePoints(data: Vector[(Int, Int)], mbp: (Double, Double, Double)): Vector[(Int, Int)] =
+    produceAllConstrainedLinePoints(data, (mbp._1, mbp._2))
 }

@@ -39,21 +39,21 @@ object TubeTracker {
       val fut = proc.processImages(imgs map { i => Image.fromAwt(i) })
       val images = Await.result(fut, Duration.Inf)
       //println("Done processing images.")
-      val imgTracker = new ImageTracker(images.tail, tubePts.asScala.toVector map { t => Tubule(Vector.empty, t._1, t._2) }, ImageTracker.getLinearTracker(opt))
+      val imgTracker = new ImageTracker(images/*.tail*/, tubePts.asScala.toVector map { t => Tubule(Vector.empty, t._1, t._2) }, ImageTracker.getLinearTracker(opt))
       imgTracker.trackTubes().asJava
     } finally system.terminate()
   }
 
   def trackFromProcessedImages(imgs: Vector[Image], tubePts: java.util.List[(Point, Point)], opt: ImageTrackerOptions = ImageTrackerOptions.getOptions): java.util.List[ImageTubeList] = {
     try {
-      val imgTracker = new ImageTracker(imgs.tail, tubePts.asScala.toVector map { t => Tubule(Vector.empty, t._1, t._2) }, ImageTracker.getLinearTracker(opt))
+      val imgTracker = new ImageTracker(imgs/*.tail*/, tubePts.asScala.toVector map { t => Tubule(Vector.empty, t._1, t._2) }, ImageTracker.getLinearTracker(opt))
       imgTracker.trackTubes().asJava
     } finally system.terminate()
   }
 
   def trackFromProcessedImagesVector(imgs: Vector[Image], tubePts: java.util.List[(Point, Point)], opt: ImageTrackerOptions = ImageTrackerOptions.getOptions): Vector[ImageTubeList] = {
     try {
-      val imgTracker = new ImageTracker(imgs.tail, tubePts.asScala.toVector map { t => Tubule(Vector.empty, t._1, t._2) }, ImageTracker.getLinearTracker(opt))
+      val imgTracker = new ImageTracker(imgs/*.tail*/, tubePts.asScala.toVector map { t => Tubule(Vector.empty, t._1, t._2) }, ImageTracker.getLinearTracker(opt))
       imgTracker.trackTubes()
     } finally system.terminate()
   }
@@ -65,13 +65,16 @@ object TubeTracker {
     images
   }
 
+  def replaceImages(vec: Vector[ImageTubeList], imgs: Vector[BufferedImage]): Vector[ImageTubeList] =
+    vec.zip(imgs) map {case (itl, img) => itl.copy(img=Image.fromAwt(img))}
+
   def labelImages(vec: Vector[ImageTubeList]): Vector[Image] = {
     vec map { case ImageTubeList(img, tubes) =>
       val newimg = img.copy
       tubes filter { tube => tube.points.nonEmpty } foreach { tube =>
         val mbp = LinearRegression.doRegression(tube.points)
         //println(s"Modelled tube with significance ${mbp._3} from ${tube.p1} to ${tube.p2} and length ${math.sqrt(math.pow(tube.p1._2 - tube.p2._2, 2) + math.pow(tube.p1._1 - tube.p2._1, 2))}")
-        val regpts = LinearRegression.produceConstrainedLinePoints(tube.points, mbp)
+        val regpts = LinearRegression.produceAllConstrainedLinePoints(tube.points, mbp)
         regpts foreach {
           case (x, y) => if (Filter.checkPxRange(img, (x, y))) {
             newimg.setPixel(x, y, Pixel(255, 0, 0, img.pixel(x, y).alpha))
@@ -81,33 +84,5 @@ object TubeTracker {
       newimg
     }
   }
-
-  /*
-
-  TODO:
-  Check catastrophe
-  Output lengths
-   */
-//  images.zipWithIndex foreach {
-//    case (img, idx) =>
-//      img.output(new File(s"test${idx+1}.jpg"))
-//  }
-
-  /*
-  tubesList.zipWithIndex foreach { case (ImageTubeList(img, tubes), idx) =>
-    tubes filter {tube => tube.points.nonEmpty} foreach { tube =>
-      val mbp = LinearRegression.doRegression(tube.points)
-      println(s"Modelled tube with significance ${mbp._3} from ${tube.p1} to ${tube.p2} and length ${math.sqrt(math.pow(tube.p1._2 - tube.p2._2, 2) + math.pow(tube.p1._1 - tube.p2._1, 2))}")
-      val regpts = LinearRegression.produceConstrainedLinePoints(tube.points, mbp)
-      regpts foreach {
-        case (x, y) => if (Filter.checkPxRange(img, (x, y))) {
-          img.setPixel(x, y, Pixel(255, 0, 0, img.pixel(x, y).alpha))
-        }
-      }
-    }
-    img.output(new File(s"test${idx+1}.jpg"))
-  }
-  system.terminate()
-  */
 }
 

@@ -275,7 +275,7 @@ public class TubeTrackerGUI extends JFrame{
         if (option == javax.swing.JFileChooser.APPROVE_OPTION) {
             java.io.File file = chooser.getSelectedFile();
             String f = file.getAbsolutePath();
-            TiffStackWriter.writeTiffStack(ImagePane.convertToBufferedImage(TubeTracker.labelImages(results)), new File(f));
+            TiffStackWriter.writeTiffStack(ImagePane.convertToBufferedImage(TubeTracker.labelImages(TubeTracker.replaceImages(results,imagePane.images))), new File(f));
         }
     }
 
