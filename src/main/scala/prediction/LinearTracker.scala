@@ -93,7 +93,7 @@ class LinearTracker(
     val newpts = newptsSet.toVector
     val additionalPoints = Set(newpts:_*).diff(Set(tube.points:_*))
     val newtubepts = (additionalPoints filter (pt => predictor.predict(pt, tube.p1, tube.p2))).toVector ++
-      (if(tube.points.isEmpty) newpts else tube.points.intersect(newpts))
+      (if(tube.points.isEmpty) generateInitialTube(timg, tube.p1, tube.p2, structuralElement) else tube.points.intersect(newpts))
     val res = getLargestConnectedComponent(timg, newtubepts)
     // WHYYYYYYY is the first one smaller?
     // First one only has pts at ENDS because there are no points in the vector
@@ -119,5 +119,14 @@ class LinearTracker(
       val maxcomp = if (comps.nonEmpty) comps.maxBy(_.length) else Vector.empty
       maxcomp map (px => (px._1 + minX, px._2 + minY))
     }
+  }
+
+  private def generateInitialTube(img: Image, p1: (Int, Int), p2: (Int, Int), ele: StructuralElement, n: Int = 3): Vector[(Int, Int)] = {
+    val slope = (p2._2 - p1._2).toDouble / (p2._1 - p1._1)
+    val intercept = p1._2 - (p1._1 * slope)
+    val pts = LinearRegression.produceAllConstrainedLinePoints(Vector(p1, p2), (slope, intercept))
+    OpenCloseFilter.nest[Vector[(Int, Int)]](lst => {
+      lst flatMap { p => ele.element map { e => (e._1 + p._1, e._2 + p._2) } filter {pt => Filter.checkPxRange(img, pt)} } distinct
+    }, pts, n)
   }
 }

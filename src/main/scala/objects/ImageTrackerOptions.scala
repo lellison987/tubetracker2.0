@@ -12,6 +12,7 @@ case class ImageTrackerOptions(
   beta: Double = 100.0,
   pValueLimit: Double = 0.05,
   thresholdValue: Int = 65,
+  constrastValue: Option[Double] = None,
   structuralElement: StructuralElement = StructuralElements.structCross,
   minSize: Int = 50
 )
@@ -19,8 +20,9 @@ case class ImageTrackerOptions(
 object ImageTrackerOptions {
   val defaultOptions = ImageTrackerOptions()
 
-  lazy val getOptions: ImageTrackerOptions = {
+  def getOptions: ImageTrackerOptions = {
     if(new File("config.json").exists()) {
+      println("Read configuration file.")
       val json = scala.io.Source.fromFile("config.json").mkString
       decode[ImageTrackerOptions](json).getOrElse(ImageTrackerOptions())
     } else {
@@ -34,6 +36,17 @@ object ImageTrackerOptions {
         case e : Exception => e.printStackTrace()
       }
       opt
+    }
+  }
+
+  def writeToConfigFile(opt: ImageTrackerOptions): Unit = {
+    try {
+      val writer = new PrintWriter(new File("config.json"))
+      writer.write(opt.asJson.toString())
+      writer.close()
+    } catch {
+      case ioex: IOException => println("Could not open config file for writing!")
+      case e : Exception => e.printStackTrace()
     }
   }
 }

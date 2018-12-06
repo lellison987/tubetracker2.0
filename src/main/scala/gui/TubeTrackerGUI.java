@@ -5,6 +5,8 @@ import objects.ImageTrackerOptions;
 import objects.ImageTubeList;
 import prediction.TubeTracker;
 import scala.Function1;
+import scala.None;
+import scala.Some;
 import scala.collection.immutable.Vector;
 import scala.collection.immutable.VectorBuilder;
 
@@ -32,6 +34,7 @@ public class TubeTrackerGUI extends JFrame{
     private javax.swing.JMenuItem undoMenuItem;
     private javax.swing.JMenu fileMenu;
     private javax.swing.JSeparator jSeparator1;
+    private javax.swing.JMenuItem setConfigMenuItem;
     private javax.swing.JMenuBar mainMenuBar;
     private javax.swing.JMenuItem openMenuItem;
     private javax.swing.JMenuItem runMenuItem;
@@ -68,6 +71,7 @@ public class TubeTrackerGUI extends JFrame{
                 fileMenu = new javax.swing.JMenu();
                 openMenuItem = new javax.swing.JMenuItem();
                 runMenuItem = new javax.swing.JMenuItem();
+                setConfigMenuItem = new javax.swing.JMenuItem();
                 exportMenu = new javax.swing.JMenu();
                 dataFileMenuItem = new javax.swing.JMenuItem();
                 labeledImageMenuItem = new javax.swing.JMenuItem();
@@ -130,6 +134,14 @@ public class TubeTrackerGUI extends JFrame{
                 undoMenuItem.getAccessibleContext().setAccessibleDescription("Undo menu item.");
 
                 fileMenu.add(jSeparator1);
+
+                setConfigMenuItem.setText("Set Configurations");
+                setConfigMenuItem.addActionListener(new java.awt.event.ActionListener() {
+                    public void actionPerformed(java.awt.event.ActionEvent evt) {
+                        setConfigActionPerformed(evt);
+                    }
+                });
+                fileMenu.add(setConfigMenuItem);
 
                 mainMenuBar.add(fileMenu);
                 fileMenu.getAccessibleContext().setAccessibleName("File Menu");
@@ -277,6 +289,24 @@ public class TubeTrackerGUI extends JFrame{
             String f = file.getAbsolutePath();
             TiffStackWriter.writeTiffStack(ImagePane.convertToBufferedImage(this.imagePane.processedImages), new File(f));
         }
+    }
+
+    private void setConfigActionPerformed(java.awt.event.ActionEvent evt) {
+        String thresholdStr = JOptionPane.showInputDialog("Threshold Value (0-255): ");
+        String contrastStr = JOptionPane.showInputDialog("Contrast Value (0-1): ");
+        int threshold = Integer.parseInt(thresholdStr);
+        double contrast = Double.parseDouble(contrastStr);
+            ImageTrackerOptions originalOpt = ImageTrackerOptions.getOptions();
+        ImageTrackerOptions newOpt = originalOpt.copy(
+                originalOpt.alpha(),
+                originalOpt.beta(),
+                originalOpt.pValueLimit(),
+                threshold,
+                (contrast == 0.0) ? scala.Option.apply(null) : scala.Option.apply(contrast),
+                originalOpt.structuralElement(),
+                originalOpt.minSize()
+        );
+        ImageTrackerOptions.writeToConfigFile(newOpt);
     }
 
 }

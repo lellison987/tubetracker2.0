@@ -23,6 +23,17 @@ object LinearRegression {
     pts.toVector
   }
 
+  def produceAllConstrainedLinePoints(data: Vector[(Int, Int)], mb: (Double, Double)): Vector[(Int, Int)] = {
+    val (m, b) = mb
+    val minX = data.map(_._1).min
+    val maxX = data.map(_._1).max
+    val minY = data.map(_._2).min
+    val maxY = data.map(_._2).max
+    val xpts = for{x <- minX to maxX if x*m + b >= minY && x*m + b <= maxY} yield (x, math.round(x*m + b).toInt)
+    val ypts = for{y <- minY to maxY if (y-b)/m >= minX && (y-b)/m <= maxX} yield (math.round((y-b)/m).toInt, y)
+    xpts.union(ypts).toVector
+  }
+
   def getLineEndpoints(data: Vector[(Int, Int)], mb: (Double, Double)): ((Int, Int), (Int, Int)) = {
     val (m, b) = mb
     val minX = data.map(_._1).min

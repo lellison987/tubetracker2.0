@@ -24,7 +24,7 @@ object TubeTracker {
 
   def track(imgs: Vector[BufferedImage], tubePts: Vector[(Point, Point)], opt: ImageTrackerOptions): Vector[ImageTubeList] = {
     try {
-      val proc = ImageProcessor.getDefaultImageProcesser
+      val proc = ImageProcessor.getImageProcesser(opt)
       val fut = proc.processImages(imgs map { i => Image.fromAwt(i) })
       val images = Await.result(fut, Duration.Inf)
       println("Done processing images.")
@@ -33,9 +33,9 @@ object TubeTracker {
     } finally system.terminate()
   }
 
-  def track(imgs: Vector[BufferedImage], tubePts: java.util.List[(Point, Point)], opt: ImageTrackerOptions = ImageTrackerOptions()): java.util.List[ImageTubeList] = {
+  def track(imgs: Vector[BufferedImage], tubePts: java.util.List[(Point, Point)], opt: ImageTrackerOptions = ImageTrackerOptions.getOptions): java.util.List[ImageTubeList] = {
     try {
-      val proc = ImageProcessor.getDefaultImageProcesser
+      val proc = ImageProcessor.getImageProcesser(opt)
       val fut = proc.processImages(imgs map { i => Image.fromAwt(i) })
       val images = Await.result(fut, Duration.Inf)
       //println("Done processing images.")
@@ -44,22 +44,22 @@ object TubeTracker {
     } finally system.terminate()
   }
 
-  def trackFromProcessedImages(imgs: Vector[Image], tubePts: java.util.List[(Point, Point)], opt: ImageTrackerOptions = ImageTrackerOptions()): java.util.List[ImageTubeList] = {
+  def trackFromProcessedImages(imgs: Vector[Image], tubePts: java.util.List[(Point, Point)], opt: ImageTrackerOptions = ImageTrackerOptions.getOptions): java.util.List[ImageTubeList] = {
     try {
       val imgTracker = new ImageTracker(imgs.tail, tubePts.asScala.toVector map { t => Tubule(Vector.empty, t._1, t._2) }, ImageTracker.getLinearTracker(opt))
       imgTracker.trackTubes().asJava
     } finally system.terminate()
   }
 
-  def trackFromProcessedImagesVector(imgs: Vector[Image], tubePts: java.util.List[(Point, Point)], opt: ImageTrackerOptions = ImageTrackerOptions()): Vector[ImageTubeList] = {
+  def trackFromProcessedImagesVector(imgs: Vector[Image], tubePts: java.util.List[(Point, Point)], opt: ImageTrackerOptions = ImageTrackerOptions.getOptions): Vector[ImageTubeList] = {
     try {
       val imgTracker = new ImageTracker(imgs.tail, tubePts.asScala.toVector map { t => Tubule(Vector.empty, t._1, t._2) }, ImageTracker.getLinearTracker(opt))
       imgTracker.trackTubes()
     } finally system.terminate()
   }
 
-  def processImages(imgs: Vector[BufferedImage]): Vector[Image] = {
-    val proc = ImageProcessor.getDefaultImageProcesser
+  def processImages(imgs: Vector[BufferedImage], opt: ImageTrackerOptions = ImageTrackerOptions.getOptions): Vector[Image] = {
+    val proc = ImageProcessor.getImageProcesser(opt)
     val fut = proc.processImages(imgs map { i => Image.fromAwt(i) })
     val images = Await.result(fut, Duration.Inf)
     images

@@ -1,6 +1,7 @@
 package gui;
 
 import com.sksamuel.scrimage.Image;
+import objects.ImageTrackerOptions;
 import objects.ImageTubeList;
 import prediction.TubeTracker;
 import scala.collection.immutable.Vector;
@@ -31,7 +32,7 @@ public class ImagePane extends JPanel {
                 System.out.println("Reading images...");
                 images = TiffStackReader.readStack(new File(imagePath));
                 System.out.println("Processing images... Please wait.");
-                processedImages = TubeTracker.processImages(images);
+                processedImages = TubeTracker.processImages(images, ImageTrackerOptions.getOptions());
                 System.out.println("Done processing images.");
                 displayImage = images.head();
             }
