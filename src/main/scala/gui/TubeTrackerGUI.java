@@ -34,6 +34,7 @@ public class TubeTrackerGUI extends JFrame{
     private javax.swing.JMenuItem runMenuItem;
     private javax.swing.JMenu exportMenu;
     private javax.swing.JMenuItem dataFileMenuItem;
+    private javax.swing.JMenuItem dataQueryMenuItem;
     private javax.swing.JMenuItem labeledImageMenuItem;
     private javax.swing.JMenuItem processedImagesMenuItem;
     Vector<ImageTubeList> results;
@@ -69,6 +70,7 @@ public class TubeTrackerGUI extends JFrame{
                 setConfigMenuItem = new javax.swing.JMenuItem();
                 exportMenu = new javax.swing.JMenu();
                 dataFileMenuItem = new javax.swing.JMenuItem();
+                dataQueryMenuItem = new javax.swing.JMenuItem();
                 labeledImageMenuItem = new javax.swing.JMenuItem();
                 processedImagesMenuItem = new javax.swing.JMenuItem();
                 jSeparator1 = new javax.swing.JSeparator();
@@ -153,6 +155,16 @@ public class TubeTrackerGUI extends JFrame{
                 exportMenu.add(dataFileMenuItem);
                 dataFileMenuItem.getAccessibleContext().setAccessibleName("Export File Menu Item");
                 dataFileMenuItem.getAccessibleContext().setAccessibleDescription("Export file menu item.");
+
+                dataQueryMenuItem.setText("Data Query");
+                dataQueryMenuItem.addActionListener(new java.awt.event.ActionListener() {
+                    public void actionPerformed(java.awt.event.ActionEvent evt) {
+                        exportDataQueryActionPerformed(evt);
+                    }
+                });
+                exportMenu.add(dataQueryMenuItem);
+                dataQueryMenuItem.getAccessibleContext().setAccessibleName("Export Query Menu Item");
+                dataQueryMenuItem.getAccessibleContext().setAccessibleDescription("Export query menu item.");
 
                 labeledImageMenuItem.setText("Labeled Images");
                 labeledImageMenuItem.addActionListener(new java.awt.event.ActionListener() {
@@ -331,6 +343,58 @@ public class TubeTrackerGUI extends JFrame{
                 }
                 System.out.print(output);
 
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
+        }
+    }
+
+    private void exportDataQueryActionPerformed(java.awt.event.ActionEvent evt) {
+        System.out.println("Exporting Query");
+        javax.swing.JFileChooser chooser = new javax.swing.JFileChooser();
+        chooser.addChoosableFileFilter(new ImageFileFilter());
+        int option = chooser.showOpenDialog(this);
+        if (option == javax.swing.JFileChooser.APPROVE_OPTION) {
+            try {
+                java.io.File file = chooser.getSelectedFile();
+                String command;
+                String frames = JOptionPane.showInputDialog("Please list the frames you wish to query (i.e. 0 1 2 3 ...). Leave blank if you wish to keep all frames.");
+                String tubes = JOptionPane.showInputDialog("Please list the tubes you wish to query (i.e. 0 1 2 ...). Leave blank if you wish to keep all tubes.");
+
+                //run query
+                if (frames==null && tubes==null) {
+                    command = "python scripts\\query.py -i \"" + file.getAbsolutePath() + "\" -o \"" + file.getAbsolutePath() + "_Query\"";
+                }
+                else if (tubes==null) {
+                    command = "python scripts\\query.py -i \"" + file.getAbsolutePath() + "\" -o \"" + file.getAbsolutePath() + "_Query\"" + " -f " + frames;
+                }
+                else if (frames==null) {
+                    command = "python scripts\\query.py -i \"" + file.getAbsolutePath() + "\" -o \"" + file.getAbsolutePath() + "_Query\"" + " -t " + tubes;
+                }
+                else {
+                    command = "python scripts\\query.py -i \"" + file.getAbsolutePath() + "\" -o \"" + file.getAbsolutePath() + "_Query\"" + " -f " + frames + " -t " + tubes;
+                }
+                System.out.println(command);
+                StringBuffer output = new StringBuffer();
+                Process p = Runtime.getRuntime().exec(command);
+                BufferedReader bfr = new BufferedReader(new InputStreamReader(p.getInputStream()));
+                String line;
+                while((line = bfr.readLine()) != null) {
+                    output.append(line);
+                }
+                JOptionPane.showMessageDialog(frame,"Your query has been saved as " + file.getAbsolutePath() + "_Query");
+
+                //display plot of queried data
+                StringBuffer output2 = new StringBuffer();
+                String command2 = "python scripts\\plot.py -i \"" + file.getAbsolutePath() + "_Query\" -o \"" + file.getAbsolutePath() + "_Query_Plot.png\"";
+                System.out.println(command2);
+                Process p2 = Runtime.getRuntime().exec(command2);
+                BufferedReader bfr2 = new BufferedReader(new InputStreamReader(p2.getInputStream()));
+                String line2;
+                while((line2 = bfr2.readLine()) != null) {
+                    output2.append(line2);
+                }
             } catch (IOException e) {
                 e.printStackTrace();
             }
