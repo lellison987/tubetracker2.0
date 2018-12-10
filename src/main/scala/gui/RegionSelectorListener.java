@@ -30,22 +30,19 @@ public class RegionSelectorListener extends JPanel implements MouseListener {
         if (origin == null) { //If the first corner is not set...
 
             origin = getAbsolutePoint(event); //set it.
-//            drawCircle(origin.x,origin.y);
 
         } else if (!origin.equals(getAbsolutePoint(event))){ //if the first corner is already set...
 
             //calculate width/height substracting from origin
             Point p = getAbsolutePoint(event);
 
-            //output the results (replace this)
-            System.out.println("P1 X is: "+ origin.x);
-            System.out.println("P1 Y is: "+ origin.y);
-            System.out.println("P2 X is: "+ p.x);
-            System.out.println("P2 Y is: "+ p.y);
+            //Display point locations
+//            System.out.println("P1 X is: "+ origin.x);
+//            System.out.println("P1 Y is: "+ origin.y);
+//            System.out.println("P2 X is: "+ p.x);
+//            System.out.println("P2 Y is: "+ p.y);
 
             pointsList.add(new Tuple2<>(origin, p));
-            //pointsList.forEach(e -> System.out.println(e.toString()));
-
 
             // set origin
             origin = null;

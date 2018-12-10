@@ -28,7 +28,6 @@ public class ImagePane extends JPanel {
     public Boolean doneProcessing;
 
     public ImagePane(String imagePath) {
-        doneProcessing=false;
         points = new ArrayList<>(25);
         listener = new RegionSelectorListener(this);
         try {
@@ -42,6 +41,7 @@ public class ImagePane extends JPanel {
         } catch (Exception ex) {
             ex.printStackTrace();
         }
+
 
         addMouseListener(new MouseAdapter() {
             @Override
@@ -75,9 +75,17 @@ public class ImagePane extends JPanel {
             g2d.drawImage(displayImage, 0, 0, this);
         }
         g2d.setColor(Color.RED);
+        int i=0;
+        int j=0;
         for (Point p : points) {
+            i++;
             g2d.fillOval(p.x - 3, p.y - 3, 6, 6);
+            if (i%2==0) {
+                j++;
+                g2d.drawString(Integer.toString(j),p.x + 7, p.y + 7);
+            }
         }
+
         g2d.dispose();
     }
 

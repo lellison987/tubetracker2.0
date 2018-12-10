@@ -319,18 +319,22 @@ public class TubeTrackerGUI extends JFrame{
                 bw.close();
 
                 /**The following does not work**/
-                String command = "python plot.py -i " + file.getAbsolutePath() + " -o " + file.getAbsolutePath() + "Plot.png";
+                StringBuffer output = new StringBuffer();
+                String command = "python scripts\\plot.py -i \"" + file.getAbsolutePath() + "\" -o \"" + file.getAbsolutePath() + "Plot.png\"";
                 System.out.println(command);
                 Process p = Runtime.getRuntime().exec(command);
                 BufferedReader bfr = new BufferedReader(new InputStreamReader(p.getInputStream()));
 //                System.out.print(bfr);
                 String line;
                 while((line = bfr.readLine()) != null) {
-                    System.out.println(line);
+                    output.append(line);
                 }
+                System.out.print(output);
+
             } catch (IOException e) {
                 e.printStackTrace();
             }
+
         }
     }
 

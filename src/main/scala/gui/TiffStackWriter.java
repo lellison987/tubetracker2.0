@@ -14,6 +14,7 @@ import java.util.Iterator;
 import java.util.List;
 
 public class TiffStackWriter {
+//    Thank you ImageIO!
 
     public static void writeTiffStack(Vector<BufferedImage> images, File file) {
         if(!ImageIO.getImageWritersByFormatName("TIFF").hasNext()) {
@@ -35,7 +36,6 @@ public class TiffStackWriter {
                 writer.prepareWriteSequence(null);
                 for (int i=0; i < images.length(); i++ ) {
                     writer.writeToSequence(new IIOImage(images.apply(i),null,null), null);
-                    //System.out.println("Successfully wrote: " + i);
                 }
             } finally {
                 output.close();
@@ -44,7 +44,6 @@ public class TiffStackWriter {
             e.printStackTrace();
         }
         finally {
-            // Dispose writer in finally block to avoid memory leaks
             writer.dispose();
         }
     }

@@ -2,8 +2,8 @@
   "alpha" : 200.0,
   "beta" : 100.0,
   "pValueLimit" : 0.05,
-  "thresholdValue" : 60,
-  "constrastValue" : 0.75,
+  "thresholdValue" : 150,
+  "constrastValue" : 0.5,
   "structuralElement" : {
     "element" : [
       [
