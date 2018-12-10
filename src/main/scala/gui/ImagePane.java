@@ -1,6 +1,7 @@
 package gui;
 
 import com.sksamuel.scrimage.Image;
+import javafx.concurrent.Task;
 import objects.ImageTrackerOptions;
 import objects.ImageTubeList;
 import prediction.TubeTracker;
@@ -13,6 +14,7 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
 import java.io.File;
+import java.nio.Buffer;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -23,18 +25,19 @@ public class ImagePane extends JPanel {
     RegionSelectorListener listener;
     Vector<BufferedImage> images;
     Vector<Image> processedImages;
+    public Boolean doneProcessing;
 
     public ImagePane(String imagePath) {
+        doneProcessing=false;
         points = new ArrayList<>(25);
         listener = new RegionSelectorListener(this);
         try {
             if (imagePath!=null) {
-                System.out.println("Reading images...");
+
                 images = TiffStackReader.readStack(new File(imagePath));
-                System.out.println("Processing images... Please wait.");
                 processedImages = TubeTracker.processImages(images, ImageTrackerOptions.getOptions());
-                System.out.println("Done processing images.");
                 displayImage = images.head();
+
             }
         } catch (Exception ex) {
             ex.printStackTrace();
@@ -49,6 +52,10 @@ public class ImagePane extends JPanel {
                 repaint();
             }
         });
+    }
+
+    public Boolean getDoneProcessing() {
+        return doneProcessing;
     }
 
     public ImagePane() {

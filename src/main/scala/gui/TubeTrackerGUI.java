@@ -18,17 +18,11 @@ import java.awt.Point;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
 import javax.swing.*;
 
-//import static com.sun.java.accessibility.util.AWTEventMonitor.addWindowListener;
-
-//ignore the missing package. It works.
 public class TubeTrackerGUI extends JFrame{
     private javax.swing.JDesktopPane desktop;
     private javax.swing.JMenuItem undoMenuItem;
@@ -45,6 +39,7 @@ public class TubeTrackerGUI extends JFrame{
     Vector<ImageTubeList> results;
     private JFrame frame;
     private ImagePane imagePane;
+    private String imagePath;
 
     public static void main(String[] args) {
         new TubeTrackerGUI();
@@ -203,22 +198,87 @@ public class TubeTrackerGUI extends JFrame{
 
     private void openMenuItemActionPerformed(java.awt.event.ActionEvent evt) {
         javax.swing.JFileChooser chooser = new javax.swing.JFileChooser();
-        chooser.addChoosableFileFilter(new ImageViewer.ImageFileFilter());
+        chooser.addChoosableFileFilter(new ImageFileFilter());
         int option = chooser.showOpenDialog(this);
         if (option == javax.swing.JFileChooser.APPROVE_OPTION) {
             java.io.File file = chooser.getSelectedFile();
             if (file == null) return;
-            String imagePath = file.getAbsolutePath();
+            imagePath = file.getAbsolutePath();
             if(imagePane != null) frame.remove(imagePane);
             frame.setVisible(false);
-            imagePane = new ImagePane(imagePath);
-            frame.add(imagePane);
-            frame.setVisible(true);
+            final JDialog dialog = new JDialog(); // modal
+            dialog.setUndecorated(true);
+            JProgressBar bar = new JProgressBar();
+            bar.setIndeterminate(true);
+            bar.setStringPainted(true);
+            bar.setString("  Processing images...Please wait.  ");
+            dialog.add(bar);
+            dialog.setLocationRelativeTo(null);
+            dialog.pack();
+
+            SwingWorker<Void,Void> worker = new SwingWorker<Void, Void>()
+            {
+                @Override
+                public Void doInBackground()
+                {
+                    imagePane = new ImagePane(imagePath);
+                    return null;
+                }
+
+
+                @Override
+                protected void done()
+                {
+                    dialog.dispose();
+                    frame.add(imagePane);
+                    frame.setVisible(true);
+                    JOptionPane.showMessageDialog(frame,"Done with preprocessing. Please click on the endpoints of the microtubules you wish to track.");
+                }
+            };
+            worker.execute();
+            dialog.setAlwaysOnTop(true);
+            dialog.setVisible(true);
+
+//            imagePane = new ImagePane(imagePath);
+//            frame.add(imagePane);
+//            frame.setVisible(true);
         }
     }
 
     private void runMenuItemActionPerformed(java.awt.event.ActionEvent evt) {
-        results = TubeTracker.trackFromProcessedImagesVector(imagePane.processedImages, imagePane.listener.getPointsList(), ImageTrackerOptions.getOptions());
+        final JDialog dialog = new JDialog(); // modal
+        dialog.setUndecorated(true);
+        JProgressBar bar = new JProgressBar();
+        bar.setIndeterminate(true);
+        bar.setStringPainted(true);
+        bar.setString("  Tracking tubes...  ");
+        dialog.add(bar);
+        dialog.setLocationRelativeTo(null);
+        dialog.pack();
+
+        SwingWorker<Void,Void> worker = new SwingWorker<Void, Void>()
+        {
+            @Override
+            public Void doInBackground()
+            {
+                results = TubeTracker.trackFromProcessedImagesVector(imagePane.processedImages, imagePane.listener.getPointsList(), ImageTrackerOptions.getOptions());
+                return null;
+            }
+
+
+            @Override
+            protected void done()
+            {
+                dialog.dispose();
+                JOptionPane.showMessageDialog(frame,"Done tracking tubes. Use the export menu to save results.");
+            }
+        };
+        worker.execute();
+        dialog.setAlwaysOnTop(true);
+        dialog.setVisible(true);
+
+
+//        results = TubeTracker.trackFromProcessedImagesVector(imagePane.processedImages, imagePane.listener.getPointsList(), ImageTrackerOptions.getOptions());
         System.out.println("Done processing results.");
     }
 
@@ -249,7 +309,7 @@ public class TubeTrackerGUI extends JFrame{
             return;
         }
         javax.swing.JFileChooser chooser = new javax.swing.JFileChooser();
-        chooser.addChoosableFileFilter(new ImageViewer.ImageFileFilter());
+        chooser.addChoosableFileFilter(new ImageFileFilter());
         int option = chooser.showSaveDialog(this);
         if (option == javax.swing.JFileChooser.APPROVE_OPTION) {
             try {
@@ -257,6 +317,17 @@ public class TubeTrackerGUI extends JFrame{
                 BufferedWriter bw = new BufferedWriter(new FileWriter(file));
                 bw.write(ImageTubeList.makeCSVString(results));
                 bw.close();
+
+                /**The following does not work**/
+                String command = "python plot.py -i " + file.getAbsolutePath() + " -o " + file.getAbsolutePath() + "Plot.png";
+                System.out.println(command);
+                Process p = Runtime.getRuntime().exec(command);
+                BufferedReader bfr = new BufferedReader(new InputStreamReader(p.getInputStream()));
+//                System.out.print(bfr);
+                String line;
+                while((line = bfr.readLine()) != null) {
+                    System.out.println(line);
+                }
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -270,7 +341,7 @@ public class TubeTrackerGUI extends JFrame{
             return;
         }
         javax.swing.JFileChooser chooser = new javax.swing.JFileChooser();
-        chooser.addChoosableFileFilter(new ImageViewer.ImageFileFilter());
+        chooser.addChoosableFileFilter(new ImageFileFilter());
         int option = chooser.showSaveDialog(this);
         if (option == javax.swing.JFileChooser.APPROVE_OPTION) {
             java.io.File file = chooser.getSelectedFile();
@@ -282,7 +353,7 @@ public class TubeTrackerGUI extends JFrame{
     private void exportProcessedImagesActionPerformed(java.awt.event.ActionEvent evt) {
         System.out.println("Exporting Processed Images");
         javax.swing.JFileChooser chooser = new javax.swing.JFileChooser();
-        chooser.addChoosableFileFilter(new ImageViewer.ImageFileFilter());
+        chooser.addChoosableFileFilter(new ImageFileFilter());
         int option = chooser.showSaveDialog(this);
         if (option == javax.swing.JFileChooser.APPROVE_OPTION) {
             java.io.File file = chooser.getSelectedFile();
@@ -307,6 +378,22 @@ public class TubeTrackerGUI extends JFrame{
                 originalOpt.minSize()
         );
         ImageTrackerOptions.writeToConfigFile(newOpt);
+    }
+
+    /** Define custom file filter for acceptable image files.
+     */
+    public static class ImageFileFilter extends javax.swing.filechooser.FileFilter {
+
+        public boolean accept(java.io.File file) {
+            if (file == null)
+                return false;
+            return file.isDirectory() || file.getName().toLowerCase().endsWith(".gif") || file.getName().toLowerCase().endsWith(".jpg");
+        }
+
+        public String getDescription() {
+            return "Image files (*.gif, *.jpg)";
+        }
+
     }
 
 }

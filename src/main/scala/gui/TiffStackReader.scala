@@ -7,6 +7,7 @@ import com.twelvemonkeys.imageio.plugins.tiff.{TIFFImageReaderSpi, TIFFImageWrit
 import javax.imageio.ImageIO
 
 object TiffStackReader {
+
   def readStack(file: File): Vector[BufferedImage] = {
     /* taken from twelvemonkeys imageio library github page*/
     // Create input stream
