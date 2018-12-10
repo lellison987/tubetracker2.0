@@ -330,7 +330,7 @@ public class TubeTrackerGUI extends JFrame{
                 bw.write(ImageTubeList.makeCSVString(results));
                 bw.close();
 
-                /**The following does not work**/
+                //display plot
                 StringBuffer output = new StringBuffer();
                 String command = "python scripts\\plot.py -i \"" + file.getAbsolutePath() + "\" -o \"" + file.getAbsolutePath() + "Plot.png\"";
                 System.out.println(command);
