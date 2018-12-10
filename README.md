@@ -6,3 +6,4 @@ Download a pre-compiled JAR file and scripts. Run the JAR in the extracted folde
 
 View a full report and user guide [here](https://wustl.box.com/s/vpxxwlwc2gzmg3qdb0aqzpj0h3ne9wq1).
 
+Download test data [here](https://wustl.box.com/s/rk6h3pgtxbcbzeyqklugonh8b4d0cm4k).
