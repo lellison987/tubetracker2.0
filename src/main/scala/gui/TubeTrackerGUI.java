@@ -364,16 +364,16 @@ public class TubeTrackerGUI extends JFrame{
 
                 //run query
                 if (frames==null && tubes==null) {
-                    command = "python scripts\\query.py -i \"" + file.getAbsolutePath() + "\" -o \"" + file.getAbsolutePath() + "_Query\"";
+                    command = "python scripts" + File.separator + "query.py -i \"" + file.getAbsolutePath() + "\" -o \"" + file.getAbsolutePath() + "_Query\"";
                 }
                 else if (tubes==null) {
-                    command = "python scripts\\query.py -i \"" + file.getAbsolutePath() + "\" -o \"" + file.getAbsolutePath() + "_Query\"" + " -f " + frames;
+                    command = "python scripts" + File.separator + "query.py -i \"" + file.getAbsolutePath() + "\" -o \"" + file.getAbsolutePath() + "_Query\"" + " -f " + frames;
                 }
                 else if (frames==null) {
-                    command = "python scripts\\query.py -i \"" + file.getAbsolutePath() + "\" -o \"" + file.getAbsolutePath() + "_Query\"" + " -t " + tubes;
+                    command = "python scripts" + File.separator + "query.py -i \"" + file.getAbsolutePath() + "\" -o \"" + file.getAbsolutePath() + "_Query\"" + " -t " + tubes;
                 }
                 else {
-                    command = "python scripts\\query.py -i \"" + file.getAbsolutePath() + "\" -o \"" + file.getAbsolutePath() + "_Query\"" + " -f " + frames + " -t " + tubes;
+                    command = "python scripts" + File.separator + "query.py -i \"" + file.getAbsolutePath() + "\" -o \"" + file.getAbsolutePath() + "_Query\"" + " -f " + frames + " -t " + tubes;
                 }
                 System.out.println(command);
                 StringBuffer output = new StringBuffer();
